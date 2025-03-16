@@ -4,7 +4,7 @@ import Map from './Map';
 import './App.css';
 
 const App = () => {
-  const route = "http://sateliguess-back-production.up.railway.app/api/";
+  const route = "https://sateliguess-back-production.up.railway.app/api/";
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
   const [input, setInput] = useState('');
