@@ -17,6 +17,55 @@ main {
   flex-direction: column;  
 }
 
+h2{
+  margin-bottom: 8px;
+}
+
+footer{
+  color: white;
+  margin-top: 38px;
+  margin-bottom: 38px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.xarxes{
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+}
+
+.xarxes a{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+
+.icon{
+  width: 22px;
+  height: 22px;
+}
+.icon2{
+  width: 32px;
+  height: 32px;
+}
+.regio img{
+  width: 42px;
+  height: auto;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ajuda{
+  font-size: 32px;
+  cursor: pointer;
+}
+
 #mapa{
   width: 100%;
   max-width: 600px; 
@@ -31,9 +80,19 @@ form{
   gap: 16px;
 }
 
-h1{
+.title{
+  width: 100%;
+  max-width: 600px; 
+  text-align: center;
+  border-bottom: 1px solid white;
   color: white;
-  padding: 16px;
+  padding-bottom: 6px;
+  padding-top: 18px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
 }
 
 .attempts{
@@ -167,10 +226,14 @@ h1{
 }
 
 .modal-content {
+  max-width: 600px;
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  text-align: center;
+  text-align: justify;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .boton-modal{
   margin-top: 16px;
@@ -194,4 +257,8 @@ h1{
 .intents{
   font-style: italic;
   font-weight: 300;
+}
+.leaflet-marker-icon .leaflet-zoom-animated .leaflet-interactive{
+  display: none;
+
 }
