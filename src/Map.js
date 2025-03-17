@@ -23,6 +23,7 @@ const Map = ({ coordinates = [0, 0] }) => {
       scrollWheelZoom={false} // Bloquea zoom con la rueda del ratón
       doubleClickZoom={false} // Bloquea zoom con doble clic
       zoomControl={false} // Oculta el control de zoom
+      touchZoom={false} //Zoom con los dedos
     >
       <TileLayer
         url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"

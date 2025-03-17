@@ -66,13 +66,32 @@ footer {
 
 .regio,
 .ajuda {
-  font-size: 32px;
+  font-size: 28px;
   cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
 }
 
 .ajuda {
   font-size: 32px;
   cursor: pointer;
+}
+
+.checks{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.check{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+input[type="checkbox"]{
+  width: 18px;
 }
 
 #mapa {

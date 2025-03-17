@@ -16,6 +16,8 @@ const App = () => {
   const [showModalPista, setShowModalPista] = useState(false);
   const [showModalAjuda, setShowModalAjuda] = useState(false);
   const [showModalRegio, setShowModalRegio] = useState(false);
+  const [showModalDificultat, setShowModalDificultat] = useState(false);
+  const [dificultat, setDificultat] = useState({});
   const [pistaIndex, setPistaIndex] = useState(0);
   const [win, setWin] = useState(false);
   const firstLoad = useRef(true);
@@ -24,6 +26,10 @@ const App = () => {
     if (firstLoad.current) {
       nuevoMunicipio();
       firstLoad.current = false;
+      const dificultatCache = localStorage.getItem("dificultat");
+      dificultatCache
+        ? setDificultat(JSON.parse(dificultatCache))
+        : setDificultat({ distancia: true, direccio: true, pistes: true });
       console.log(`
          \\    /\\
           )  ( ')  Meow
@@ -110,27 +116,26 @@ const App = () => {
     brng = (brng + 360) % 360;
     // Determinar la dirección cardinal
     const direcciones = [
-      "nord",
-      "norest",
-      "est",
-      "surest",
-      "sud",
-      "sudoest",
-      "oest",
-      "noroest",
-      "nord",
+      "⬇️",  // nord
+      "↙️",  // norest
+      "⬅️",  // est
+      "↖️",  // surest
+      "⬆️",  // sud
+      "↗️",  // sudoest
+      "➡️",  // oest
+      "↘️",  // noroest
     ];
     const index = Math.round(brng / 45); // Dividir el círculo en 8 sectores de 45°
-    const direccion = direcciones[index];
+    const direccio = direcciones[index];
 
-    return { distancia: distancia.toFixed(2), direccion };
+    return { distancia: distancia.toFixed(2), direccio };
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!municipioDiario || !guess.municipio) return;
 
-    const { distancia } = distance(municipioDiario, guess);
+    const { distancia, direccio } = distance(municipioDiario, guess);
     setPistaGastada(false);
     if (
       guess.municipio.toLowerCase() === municipioDiario.municipio.toLowerCase()
@@ -138,10 +143,14 @@ const App = () => {
       setWin(true);
     } else {
       if (!attempts.includes(guess.municipio)) {
-        setAttempts([...attempts, { nom: guess.municipio, distancia }]);
+        setAttempts([
+          ...attempts,
+          { nom: guess.municipio, distancia, direccio },
+        ]);
       }
     }
     setInput("");
+    setGuess("");
   };
 
   const cargarMunicipio = () => {
@@ -167,6 +176,11 @@ const App = () => {
   const regio = (e) => {
     e.preventDefault();
     setShowModalRegio(true);
+  };
+
+  const modalDificultat = (e) => {
+    e.preventDefault();
+    setShowModalDificultat(true);
   };
 
   const getPista = () => {
@@ -222,8 +236,9 @@ const App = () => {
           ❓
         </div>
         <h1>Sateliguess</h1>
-        <div className="regio" onClick={(e) => regio(e)}>
-          🗺️
+        <div className="regio">
+          <div onClick={(e) => modalDificultat(e)}>⚙️</div>
+          <div onClick={(e) => regio(e)}>🗺️</div>
         </div>
       </div>
       <div id="mapa">
@@ -235,7 +250,10 @@ const App = () => {
             {attempts.map((attempt, index) => (
               <div className="attempt" key={index}>
                 <span>❌ {attempt.nom}</span>
-                <span>{attempt.distancia} Km</span>
+                <span>
+                  {dificultat.distancia ? `${attempt.distancia} Km ` : " "}
+                  {dificultat.direccio ? attempt.direccio : ""}
+                </span>
               </div>
             ))}
           </div>
@@ -271,20 +289,22 @@ const App = () => {
               🔎 ENDEVINA
             </button>
             <div className="botones">
-              <button
-                onClick={(e) => pista(e)}
-                className={
-                  attempts.length < 5 || pistaGastada
-                    ? "boton disabled"
-                    : "boton"
-                }
-                disabled={attempts.length < 5 || pistaGastada}
-              >
-                Pista{" "}
-                <span className="intents">
-                  {attempts.length < 5 && `Intents: ${attempts.length}/5`}
-                </span>
-              </button>
+              {dificultat.pistes && (
+                <button
+                  onClick={(e) => pista(e)}
+                  className={
+                    attempts.length < 5 || pistaGastada
+                      ? "boton disabled"
+                      : "boton"
+                  }
+                  disabled={attempts.length < 5 || pistaGastada}
+                >
+                  Pista{" "}
+                  <span className="intents">
+                    {attempts.length < 5 && `Intents: ${attempts.length}/5`}
+                  </span>
+                </button>
+              )}
               <button onClick={(e) => rendirse(e)} className="boton">
                 Em rendisc
               </button>
@@ -330,8 +350,8 @@ const App = () => {
               className="icon3"
               src="https://i.imgur.com/45x8o2E.png"
               alt="Kofi"
-            />{" "}
-            Contribueix
+            />
+            <span>{"Dona'm suport"}</span>
           </a>
         </div>
         <span>
@@ -359,6 +379,63 @@ const App = () => {
           </div>
         </div>
       )}
+      {showModalDificultat && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Configura la dificultat</h2>
+            <div className="checks">
+              <div className="check">
+                <input
+                  type="checkbox"
+                  checked={dificultat.distancia}
+                  onClick={() =>
+                    setDificultat({
+                      ...dificultat,
+                      distancia: !dificultat.distancia,
+                    })
+                  }
+                />
+                <label>Mostrar distancia</label>
+              </div>
+              <div className="check">
+                <input
+                  type="checkbox"
+                  checked={dificultat.direccio}
+                  onClick={() =>
+                    setDificultat({
+                      ...dificultat,
+                      direccio: !dificultat.direccio,
+                    })
+                  }
+                />
+                <label>Mostrar direcció</label>
+              </div>
+              <div className="check">
+                <input
+                  type="checkbox"
+                  checked={dificultat.pistes}
+                  onClick={() =>
+                    setDificultat({
+                      ...dificultat,
+                      pistes: !dificultat.pistes,
+                    })
+                  }
+                />
+                <label>Habilitar pistes</label>
+              </div>
+            </div>
+            <button
+              className="boton-modal"
+              onClick={() => {
+                setShowModalDificultat(false);
+                localStorage.setItem("dificultat", JSON.stringify(dificultat));
+              }}
+            >
+              D'acord
+            </button>
+          </div>
+        </div>
+      )}
       {showModalAjuda && (
         <div className="modal">
           <div className="modal-content">
@@ -369,7 +446,7 @@ const App = () => {
               oficial (No fiques "Játiva" o "Carcagente", fes el favor).
             </p>
             <p>
-              2. Si no has encertat, voràs a què distància es troba el municipi
+              2. Si no has encertat, voràs a què distància i direcció es troba el municipi
               seleccionar del de la imatge.
             </p>
             <p>
