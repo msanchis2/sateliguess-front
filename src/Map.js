@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import React from 'react';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const mapContainerStyle = {
@@ -14,7 +14,6 @@ const Map = ({ coordinates = [0, 0] }) => {
   if(!coordinates) {
     return (<div></div>)
   }
-
   return (
     <MapContainer
       center={coordinates}
@@ -29,7 +28,6 @@ const Map = ({ coordinates = [0, 0] }) => {
         url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         attribution="&copy; Esri, Maxar, Earthstar Geographics"
       />
-      {/* {coordinates && <Marker position={coordinates} />} */}
     </MapContainer>
   );
 };
