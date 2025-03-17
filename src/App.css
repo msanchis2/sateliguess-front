@@ -1,11 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
-*{
+
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
-body{
+
+body {
   background: rgb(15 23 42);
   padding: 0 20px;
 }
@@ -14,14 +16,14 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
-h2{
+h2 {
   margin-bottom: 8px;
 }
 
-footer{
+footer {
   color: white;
   margin-top: 38px;
   margin-bottom: 38px;
@@ -31,7 +33,7 @@ footer{
   gap: 12px;
 }
 
-.xarxes{
+.xarxes {
   display: flex;
   flex-direction: row;
   gap: 18px;
@@ -39,7 +41,7 @@ footer{
   align-items: center;
 }
 
-.xarxes a{
+.xarxes a {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -47,44 +49,49 @@ footer{
   color: white;
 }
 
-.icon{
+.icon {
   width: 24px;
   height: 24px;
 }
-.icon2{
+
+.icon2 {
   width: 32px;
   height: 32px;
 }
-.icon3{
+
+.icon3 {
   width: 32px;
   height: 24px;
 }
-.regio, .ajuda{
-  font-size: 32px;
-  cursor: pointer;
-}
-.ajuda{
+
+.regio,
+.ajuda {
   font-size: 32px;
   cursor: pointer;
 }
 
-#mapa{
+.ajuda {
+  font-size: 32px;
+  cursor: pointer;
+}
+
+#mapa {
   width: 100%;
-  max-width: 600px; 
+  max-width: 600px;
   aspect-ratio: 16/9;
   height: auto;
   margin: 0 auto;
 }
 
-form{
+form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.title{
+.title {
   width: 100%;
-  max-width: 600px; 
+  max-width: 600px;
   text-align: center;
   border-bottom: 1px solid white;
   color: white;
@@ -97,7 +104,7 @@ form{
   margin-bottom: 16px;
 }
 
-.attempts{
+.attempts {
   overflow-y: auto;
   max-height: 260px;
   max-width: 600px;
@@ -108,26 +115,30 @@ form{
   margin-bottom: 8px;
   width: 100%;
   max-width: 600px;
-  span{
+
+  span {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
   }
 }
-.win{
-  border: 6px solid; 
+
+.win {
+  border: 6px solid;
   border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  border-image-slice: 1; 
+  border-image-slice: 1;
   background-color: #FFF !important;
   padding: 12px !important;
   border-radius: 4px;
   font-size: 20px;
-  span{
+
+  span {
     font-weight: bold;
   }
 }
-.attempt{
+
+.attempt {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -139,7 +150,7 @@ form{
   border-radius: 4px;
 }
 
-.boton{
+.boton {
   width: 100%;
   background-color: transparent;
   border: 2px solid #FFF;
@@ -151,28 +162,33 @@ form{
   font-weight: 700;
   cursor: pointer;
 }
-.disabled{
+
+.disabled {
   color: #a0a0a0 !important;
   border: 2px solid #a0a0a0 !important;
   cursor: auto !important;
 }
-.botones{
+
+.botones {
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
-.container{
+
+.container {
   max-width: 600px;
   width: 100%;
 }
-.container .searchInput{
+
+.container .searchInput {
   background: #fff;
   width: 100%;
   border-radius: 5px;
   position: relative;
-  box-shadow: 0px 1px 5px 3px rgba(0,0,0,0.12);
+  box-shadow: 0px 1px 5px 3px rgba(0, 0, 0, 0.12);
 }
-.searchInput input{
+
+.searchInput input {
   height: 55px;
   width: 100%;
   outline: none;
@@ -180,29 +196,36 @@ form{
   border-radius: 5px;
   padding: 0 60px 0 20px;
   font-size: 18px;
-  box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
 }
-.searchInput.active input{
+
+.searchInput.active input {
   border-radius: 5px 5px 0 0;
 }
-.searchInput .resultBox{
+
+.searchInput .resultBox {
   max-height: 280px;
   overflow-y: auto;
 }
-.resultBox div{
+
+.resultBox div {
   padding: 8px;
   border-bottom: 1px solid e5e7eb;
 }
-.resultBox div:hover{
+
+.resultBox div:hover {
   background-color: #e5e7eb;
 }
-.searchInput.active .resultBox li{
+
+.searchInput.active .resultBox li {
   display: block;
 }
-.resultBox li:hover{
+
+.resultBox li:hover {
   background: #efefef;
 }
-.searchInput .icon{
+
+.searchInput .icon {
   position: absolute;
   right: 0px;
   top: 0px;
@@ -214,6 +237,7 @@ form{
   color: #644bff;
   cursor: pointer;
 }
+
 .modal {
   position: fixed;
   top: 0;
@@ -237,7 +261,8 @@ form{
   flex-direction: column;
   align-items: center;
 }
-.boton-modal{
+
+.boton-modal {
   margin-top: 16px;
   border: 2px solid black;
   width: 175px;
@@ -250,26 +275,31 @@ form{
   font-weight: 700;
   cursor: pointer;
 }
-.pista{
+
+.pista {
   margin-top: 8px;
-  p{
+
+  p {
     margin-bottom: 4px;
   }
 }
-.intents{
+
+.intents {
   font-style: italic;
   font-weight: 300;
 }
-.leaflet-marker-icon .leaflet-zoom-animated .leaflet-interactive{
+
+.leaflet-marker-icon .leaflet-zoom-animated .leaflet-interactive {
   display: none;
 
 }
 
 @media (max-width: 430px) {
-  footer{
+  footer {
     font-size: 10.5px;
   }
-  .boton{
+
+  .boton {
     font-size: 15px;
   }
 }

@@ -26,7 +26,6 @@ const Map = ({ coordinates = [0, 0] }) => {
     >
       <TileLayer
         url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        attribution="&copy; Esri, Maxar, Earthstar Geographics"
       />
     </MapContainer>
   );
