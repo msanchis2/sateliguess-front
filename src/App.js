@@ -299,21 +299,33 @@ const App = () => {
       </div>
       <footer>
         <div className="xarxes">
-          <a href="mailto:martisanchis2000@gmail.com" target="_blank">
+          <a
+            href="mailto:martisanchis2000@gmail.com"
+            target="_blank"
+            rel="noreferrer"
+          >
             <img
               className="icon2"
               src="https://i.imgur.com/i1sA0YE.png"
               alt="Email"
             />
           </a>
-          <a href="https://www.linkedin.com/in/msanchis2/" target="_blank">
+          <a
+            href="https://www.linkedin.com/in/msanchis2/"
+            target="_blank"
+            rel="noreferrer"
+          >
             <img
               className="icon"
               src="https://i.imgur.com/58x5aRC.png"
               alt="Linkedin"
             />
           </a>
-          <a href="https://www.Ko-fi.com/martisanchis" target="_blank">
+          <a
+            href="https://www.Ko-fi.com/martisanchis"
+            target="_blank"
+            rel="noreferrer"
+          >
             <img
               className="icon"
               src="https://i.imgur.com/45x8o2E.png"
@@ -324,7 +336,11 @@ const App = () => {
         </div>
         <span>
           © 2025 Martí Sanchis Román - Codi obert baix llicència{" "}
-          <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">
+          <a
+            href="https://www.gnu.org/licenses/gpl-3.0.html"
+            target="_blank"
+            rel="noreferrer"
+          >
             GPLv3
           </a>
         </span>
