@@ -223,7 +223,7 @@ const App = () => {
         </div>
         <h1>Sateliguess</h1>
         <div className="regio" onClick={(e) => regio(e)}>
-          <img src="https://i.imgur.com/AmiAZ0v.png" alt="regio" />
+          🗺️
         </div>
       </div>
       <div id="mapa">
@@ -327,7 +327,7 @@ const App = () => {
             rel="noreferrer"
           >
             <img
-              className="icon"
+              className="icon3"
               src="https://i.imgur.com/45x8o2E.png"
               alt="Kofi"
             />{" "}
@@ -348,7 +348,7 @@ const App = () => {
       {showModalRegio && (
         <div className="modal">
           <div className="modal-content">
-            <h2>🚧Proximament🚧</h2>
+            <h2>🚧 Proximament 🚧</h2>
             <p>Estem treballant en les versions de distints països i regions</p>
             <button
               className="boton-modal"
