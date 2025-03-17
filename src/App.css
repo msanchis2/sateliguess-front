@@ -76,21 +76,24 @@ footer {
 .ajuda {
   font-size: 32px;
   cursor: pointer;
+  color:rgb(15 23 42);
 }
 
-.checks{
+.checks {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-left: auto;
   margin-right: auto;
 }
-.check{
+
+.check {
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
-input[type="checkbox"]{
+
+input[type="checkbox"] {
   width: 18px;
 }
 
@@ -320,5 +323,14 @@ form {
 
   .boton {
     font-size: 15px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .regio,
+  .ajuda {
+    font-size: 22px;
   }
 }

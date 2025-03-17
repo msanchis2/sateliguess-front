@@ -116,14 +116,14 @@ const App = () => {
     brng = (brng + 360) % 360;
     // Determinar la dirección cardinal
     const direcciones = [
-      "⬇️",  // nord
-      "↙️",  // norest
-      "⬅️",  // est
-      "↖️",  // surest
-      "⬆️",  // sud
-      "↗️",  // sudoest
-      "➡️",  // oest
-      "↘️",  // noroest
+      "⬇️", // nord
+      "↙️", // norest
+      "⬅️", // est
+      "↖️", // surest
+      "⬆️", // sud
+      "↗️", // sudoest
+      "➡️", // oest
+      "↘️", // noroest
     ];
     const index = Math.round(brng / 45); // Dividir el círculo en 8 sectores de 45°
     const direccio = direcciones[index];
@@ -232,8 +232,9 @@ const App = () => {
   return (
     <main>
       <div className="title">
-        <div className="ajuda" onClick={(e) => ajuda(e)}>
-          ❓
+        <div className="ajuda">
+          <div onClick={(e) => ajuda(e)}>❓</div>
+          <div>_</div>
         </div>
         <h1>Sateliguess</h1>
         <div className="regio">
@@ -261,7 +262,7 @@ const App = () => {
         {win && (
           <div className="attempt win">
             <span>✅ {municipioDiario.municipio}</span>
-            <span>Intents: {attempts.length}</span>
+            <span>Intents: {attempts.length + 1}</span>
           </div>
         )}
       </div>
@@ -446,8 +447,8 @@ const App = () => {
               oficial (No fiques "Játiva" o "Carcagente", fes el favor).
             </p>
             <p>
-              2. Si no has encertat, voràs a què distància i direcció es troba el municipi
-              seleccionar del de la imatge.
+              2. Si no has encertat, voràs a què distància i direcció es troba
+              el municipi seleccionar del de la imatge.
             </p>
             <p>
               3. A partir del cinqué intent fallit, per cada intent següent
