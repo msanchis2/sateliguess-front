@@ -36,7 +36,7 @@ footer {
 .xarxes {
   display: flex;
   flex-direction: row;
-  gap: 18px;
+  gap: 12px;
   justify-content: center;
   align-items: center;
 }

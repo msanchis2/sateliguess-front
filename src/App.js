@@ -76,7 +76,7 @@ const App = () => {
   const handleInputChange = useCallback(
     debounce((value) => {
       if (value.length < 3) return setSuggestions([]);
-
+  
       axios
         .get(`${route}municipios/${value}`)
         .then((response) => {
@@ -90,9 +90,10 @@ const App = () => {
           setSuggestions(filteredSuggestions);
         })
         .catch((error) => console.error("Error en la búsqueda:", error));
-    }, 300), 
-    [route, attempts]
+    }, 300),
+    [attempts]
   );
+  
 
   const onInputChange = (e) => {
     setInput(e.target.value);
@@ -215,7 +216,7 @@ const App = () => {
   };
 
   const handleCloseModal = () => {
-    toggleModal("dificultat");
+    setModals((prev) => ({ ...prev, pista: false }));
     if (pistaIndex < 2) {
       setPistaIndex(pistaIndex + 1);
     }
@@ -324,6 +325,17 @@ const App = () => {
             />
           </a>
           <a
+            href="https://github.com/msanchis2/sateliguess-front"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              className="icon2"
+              src="https://img.icons8.com/ios11/512/FFFFFF/github.png"
+              alt="Github"
+            />
+          </a>
+          <a
             href="https://www.linkedin.com/in/msanchis2/"
             target="_blank"
             rel="noreferrer"
@@ -334,6 +346,7 @@ const App = () => {
               alt="Linkedin"
             />
           </a>
+          <div>{" "}</div>
           <a
             href="https://www.Ko-fi.com/martisanchis"
             target="_blank"
@@ -450,7 +463,7 @@ const App = () => {
       {modals.pista && (
         <Modal
           show={modals.pista}
-          onClose={handleCloseModal}
+          onClose={() => handleCloseModal()}
           title={`Pista ${pistaIndex + 1}`}
           btnText="Tornar a provar"
         >
