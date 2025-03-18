@@ -8,6 +8,7 @@ import "./styles/App.css";
 const App = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/";
   const routeRef = useRef(route);
+  const firstLoad = useRef(true);
 
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
@@ -16,6 +17,10 @@ const App = () => {
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
   const [pistaGastada, setPistaGastada] = useState(false);
+  const [dificultat, setDificultat] = useState({});
+  const [pistaIndex, setPistaIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [win, setWin] = useState(false);
   const [modals, setModals] = useState({
     pistaGastada: false,
     rendirse: false,
@@ -24,13 +29,10 @@ const App = () => {
     regio: false,
     dificultat: false,
   });
-  const [dificultat, setDificultat] = useState({});
-  const [pistaIndex, setPistaIndex] = useState(0);
-  const [win, setWin] = useState(false);
-  const firstLoad = useRef(true);
 
   useEffect(() => {
     if (firstLoad.current) {
+      setIsMobile((window.innerWidth <= 768))
       nuevoMunicipio();
       firstLoad.current = false;
       const dificultatCache = localStorage.getItem("dificultat");
@@ -269,6 +271,14 @@ const App = () => {
                 value={input}
                 onChange={onInputChange}
                 placeholder="Escriu el nom del municipi..."
+                onFocus={() => {
+                  if(isMobile)
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: 'smooth',
+                    });
+                    //window.scrollTo(0, document.body.scrollHeight);
+                }}
               />
               {suggestions.length > 0 && (
                 <div className="resultBox">

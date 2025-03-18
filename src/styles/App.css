@@ -15,7 +15,6 @@ body {
 main {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
 }
 
@@ -31,6 +30,7 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  text-align: center;
 }
 
 .xarxes {
@@ -317,6 +317,9 @@ form {
 }
 
 @media (max-width: 430px) {
+  main{
+    height: 900px;
+  }
   footer {
     font-size: 10.5px;
   }
