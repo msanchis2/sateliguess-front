@@ -7,6 +7,7 @@ import "./styles/App.css";
 
 const App = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/";
+  const routeRef = useRef(route);
 
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
@@ -73,12 +74,13 @@ const App = () => {
       );
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleInputChange = useCallback(
     debounce((value) => {
       if (value.length < 3) return setSuggestions([]);
   
       axios
-        .get(`${route}municipios/${value}`)
+        .get(`${routeRef.current}municipios/${value}`)
         .then((response) => {
           const filteredSuggestions = response.data.filter(
             (m) =>
@@ -91,9 +93,8 @@ const App = () => {
         })
         .catch((error) => console.error("Error en la búsqueda:", error));
     }, 300),
-    [attempts]
+    [attempts] 
   );
-  
 
   const onInputChange = (e) => {
     setInput(e.target.value);
