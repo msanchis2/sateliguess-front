@@ -41,6 +41,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.5",
     "@types/dotenv": "^8.2.3",
     "cross-env": "^7.0.3"
   }
