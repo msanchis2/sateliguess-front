@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios"; // Importamos axios
-import Map from "./Map";
-import "./App.css";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import axios from "axios";
+import { debounce } from "lodash";
+import Map from "./components/Map";
+import Modal from "./components/Modal";
+import "./styles/App.css";
 
 const App = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/";
+
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
   const [input, setInput] = useState("");
@@ -12,11 +15,14 @@ const App = () => {
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
   const [pistaGastada, setPistaGastada] = useState(false);
-  const [showModalRendirse, setShowModalRendirse] = useState(false);
-  const [showModalPista, setShowModalPista] = useState(false);
-  const [showModalAjuda, setShowModalAjuda] = useState(false);
-  const [showModalRegio, setShowModalRegio] = useState(false);
-  const [showModalDificultat, setShowModalDificultat] = useState(false);
+  const [modals, setModals] = useState({
+    pistaGastada: false,
+    rendirse: false,
+    pista: false,
+    ajuda: false,
+    regio: false,
+    dificultat: false,
+  });
   const [dificultat, setDificultat] = useState({});
   const [pistaIndex, setPistaIndex] = useState(0);
   const [win, setWin] = useState(false);
@@ -41,6 +47,17 @@ const App = () => {
     }
   }, []);
 
+  const toggleModal = (modal) => {
+    setModals((prev) => ({ ...prev, [modal]: !prev[modal] }));
+  };
+
+  const cargarMunicipio = () => {
+    setAttempts([]);
+    setWin(false);
+    setGuess("");
+    nuevoMunicipio();
+  };
+
   const nuevoMunicipio = () => {
     axios
       .get(`${route}municipio-aleatorio`)
@@ -56,10 +73,10 @@ const App = () => {
       );
   };
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInput(value);
-    if (value.length >= 3) {
+  const handleInputChange = useCallback(
+    debounce((value) => {
+      if (value.length < 3) return setSuggestions([]);
+
       axios
         .get(`${route}municipios/${value}`)
         .then((response) => {
@@ -73,9 +90,13 @@ const App = () => {
           setSuggestions(filteredSuggestions);
         })
         .catch((error) => console.error("Error en la búsqueda:", error));
-    } else {
-      setSuggestions([]);
-    }
+    }, 300), 
+    [route, attempts]
+  );
+
+  const onInputChange = (e) => {
+    setInput(e.target.value);
+    handleInputChange(e.target.value);
   };
 
   const handleSelectSuggestion = (municipio) => {
@@ -84,51 +105,43 @@ const App = () => {
     setSuggestions([]);
   };
 
-  const distance = (municipio1, municipio2) => {
-    const toRadians = (degrees) => degrees * (Math.PI / 180);
-    // Extraer coordenadas y convertir a números
-    const lat1 = parseFloat(municipio1.latitud);
-    const lon1 = parseFloat(municipio1.longitud);
-    const lat2 = parseFloat(municipio2.latitud);
-    const lon2 = parseFloat(municipio2.longitud);
-    // Radio de la Tierra en km
+  const toRadians = (degrees) => degrees * (Math.PI / 180);
+
+  const calcularDistancia = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
-    // Diferencias de coordenadas en radianes
     const dLat = toRadians(lat2 - lat1);
     const dLon = toRadians(lon2 - lon1);
-    // Convertir coordenadas a radianes
     const radLat1 = toRadians(lat1);
     const radLat2 = toRadians(lat2);
-    // Fórmula de Haversine
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    // Distancia en km
-    const distancia = R * c;
-    // Cálculo del ángulo de dirección
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const calcularDireccio = (lat1, lon1, lat2, lon2) => {
+    const dLon = toRadians(lon2 - lon1);
+    const radLat1 = toRadians(lat1);
+    const radLat2 = toRadians(lat2);
     const y = Math.sin(dLon) * Math.cos(radLat2);
     const x =
       Math.cos(radLat1) * Math.sin(radLat2) -
       Math.sin(radLat1) * Math.cos(radLat2) * Math.cos(dLon);
-    let brng = Math.atan2(y, x) * (180 / Math.PI);
-    // Convertir el ángulo a positivo (0 a 360)
-    brng = (brng + 360) % 360;
-    // Determinar la dirección cardinal
-    const direcciones = [
-      "⬇️", // nord
-      "↙️", // norest
-      "⬅️", // est
-      "↖️", // surest
-      "⬆️", // sud
-      "↗️", // sudoest
-      "➡️", // oest
-      "↘️", // noroest
+    let brng = (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
+    return ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️"][
+      Math.round(brng / 45)
     ];
-    const index = Math.round(brng / 45); // Dividir el círculo en 8 sectores de 45°
-    const direccio = direcciones[index];
+  };
 
-    return { distancia: distancia.toFixed(2), direccio };
+  const distance = (municipio1, municipio2) => {
+    const lat1 = parseFloat(municipio1.latitud);
+    const lon1 = parseFloat(municipio1.longitud);
+    const lat2 = parseFloat(municipio2.latitud);
+    const lon2 = parseFloat(municipio2.longitud);
+    return {
+      distancia: calcularDistancia(lat1, lon1, lat2, lon2).toFixed(2),
+      direccio: calcularDireccio(lat1, lon1, lat2, lon2),
+    };
   };
 
   const handleSubmit = (e) => {
@@ -137,93 +150,72 @@ const App = () => {
 
     const { distancia, direccio } = distance(municipioDiario, guess);
     setPistaGastada(false);
+
     if (
       guess.municipio.toLowerCase() === municipioDiario.municipio.toLowerCase()
     ) {
       setWin(true);
     } else {
-      if (!attempts.includes(guess.municipio)) {
-        setAttempts([
-          ...attempts,
+      if (
+        !attempts.some(
+          (a) => a.nom.toLowerCase() === guess.municipio.toLowerCase()
+        )
+      ) {
+        setAttempts((prev) => [
+          ...prev,
           { nom: guess.municipio, distancia, direccio },
         ]);
       }
     }
+
     setInput("");
     setGuess("");
-  };
-
-  const cargarMunicipio = () => {
-    window.location.reload();
-  };
-
-  const rendirse = (e) => {
-    e.preventDefault();
-    setShowModalRendirse(true);
   };
 
   const pista = (e) => {
     e.preventDefault();
     setPistaGastada(true);
-    setShowModalPista(true);
+    toggleModal("pista");
   };
 
-  const ajuda = (e) => {
+  const openModal = (e, modal) => {
     e.preventDefault();
-    setShowModalAjuda(true);
+    toggleModal(modal);
   };
 
-  const regio = (e) => {
-    e.preventDefault();
-    setShowModalRegio(true);
-  };
-
-  const modalDificultat = (e) => {
-    e.preventDefault();
-    setShowModalDificultat(true);
+  const generarPistaLletres = (nom) => {
+    let lletres = nom.split("");
+    let indices = [...Array(nom.length).keys()]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+    return lletres.map((l, i) => (indices.includes(i) ? l : "_")).join("");
   };
 
   const getPista = () => {
-    if (pistaIndex === 0) {
-      return (
-        <div className="pista">
-          <p>Provincia: {municipioDiario.provincia}</p>
-        </div>
-      );
+    switch (pistaIndex) {
+      case 0:
+        return <p>Provincia: {municipioDiario.provincia}</p>;
+      case 1:
+        return (
+          <>
+            <p>Provincia: {municipioDiario.provincia} </p>
+            <p>Primera lletra: {municipioDiario.municipio[0]}</p>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <p>Provincia: {municipioDiario.provincia} </p>
+            <p> Nom: {generarPistaLletres(municipioDiario.municipio)}</p>
+          </>
+        );
+      default:
+        return "";
     }
-    if (pistaIndex === 1) {
-      return (
-        <div className="pista">
-          <p>Provincia: {municipioDiario.provincia}</p>
-          <p>Primera lletra: {municipioDiario.municipio[0]} </p>
-        </div>
-      );
-    }
-    if (pistaIndex === 2) {
-      const nombre = municipioDiario.municipio;
-      const letrasAleatorias = [...nombre];
-      const indicesAleatorios = [];
-      while (indicesAleatorios.length < 2) {
-        const index = Math.floor(Math.random() * nombre.length);
-        if (!indicesAleatorios.includes(index)) {
-          indicesAleatorios.push(index);
-        }
-      }
-      const letrasOcultas = letrasAleatorias.map((letra, index) => {
-        return indicesAleatorios.includes(index) ? letra : "_";
-      });
-      return (
-        <div className="pista">
-          <p>Provincia: {municipioDiario.provincia}</p>
-          <p>Nom: {letrasOcultas.join("")}</p>
-        </div>
-      );
-    }
-    return "";
   };
 
   const handleCloseModal = () => {
-    setShowModalPista(false);
+    toggleModal("dificultat");
     if (pistaIndex < 2) {
       setPistaIndex(pistaIndex + 1);
     }
@@ -233,17 +225,17 @@ const App = () => {
     <main>
       <div className="title">
         <div className="ajuda">
-          <div onClick={(e) => ajuda(e)}>❓</div>
+          <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
           <div>_</div>
         </div>
         <h1>Sateliguess</h1>
         <div className="regio">
-          <div onClick={(e) => modalDificultat(e)}>⚙️</div>
-          <div onClick={(e) => regio(e)}>🗺️</div>
+          <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
+          <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
         </div>
       </div>
       <div id="mapa">
-        <Map coordinates={coordinates} />
+        <Map coordinates={coordinates} key={coordinates?.join(",")}/>
       </div>
       <div className="attempts">
         {attempts.length > 0 && (
@@ -273,7 +265,7 @@ const App = () => {
               <input
                 type="text"
                 value={input}
-                onChange={handleInputChange}
+                onChange={onInputChange}
                 placeholder="Escriu el nom del municipi..."
               />
               {suggestions.length > 0 && (
@@ -306,7 +298,7 @@ const App = () => {
                   </span>
                 </button>
               )}
-              <button onClick={(e) => rendirse(e)} className="boton">
+              <button onClick={() => toggleModal("rendirse")} className="boton">
                 Em rendisc
               </button>
             </div>
@@ -366,128 +358,104 @@ const App = () => {
           </a>
         </span>
       </footer>
-      {showModalRegio && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>🚧 Proximament 🚧</h2>
-            <p>Estem treballant en les versions de distints països i regions</p>
-            <button
-              className="boton-modal"
-              onClick={() => setShowModalRegio(false)}
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
+      {modals.regio && (
+        <Modal
+          show={modals.regio}
+          onClose={() => toggleModal("regio")}
+          title="🚧 Proximament 🚧"
+          btnText="D'acord"
+        >
+          <p>Estem treballant en les versions de distints països i regions</p>
+        </Modal>
       )}
-      {showModalDificultat && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Configura la dificultat</h2>
-            <div className="checks">
-              <div className="check">
-                <input
-                  type="checkbox"
-                  checked={dificultat.distancia}
-                  onClick={() =>
-                    setDificultat({
-                      ...dificultat,
-                      distancia: !dificultat.distancia,
-                    })
-                  }
-                />
-                <label>Mostrar distancia</label>
-              </div>
-              <div className="check">
-                <input
-                  type="checkbox"
-                  checked={dificultat.direccio}
-                  onClick={() =>
-                    setDificultat({
-                      ...dificultat,
-                      direccio: !dificultat.direccio,
-                    })
-                  }
-                />
-                <label>Mostrar direcció</label>
-              </div>
-              <div className="check">
-                <input
-                  type="checkbox"
-                  checked={dificultat.pistes}
-                  onClick={() =>
-                    setDificultat({
-                      ...dificultat,
-                      pistes: !dificultat.pistes,
-                    })
-                  }
-                />
-                <label>Habilitar pistes</label>
-              </div>
+      {modals.dificultat && (
+        <Modal
+          show={modals.dificultat}
+          onClose={() => {
+            toggleModal("dificultat");
+            localStorage.setItem("dificultat", JSON.stringify(dificultat));
+          }}
+          title="Configura la dificultat"
+          btnText="D'acord"
+        >
+          <div className="checks">
+            <div className="check">
+              <input
+                type="checkbox"
+                checked={dificultat.distancia}
+                onChange={() =>
+                  setDificultat({
+                    ...dificultat,
+                    distancia: !dificultat.distancia,
+                  })
+                }
+              />
+              <label>Mostrar distancia</label>
             </div>
-            <button
-              className="boton-modal"
-              onClick={() => {
-                setShowModalDificultat(false);
-                localStorage.setItem("dificultat", JSON.stringify(dificultat));
-              }}
-            >
-              D'acord
-            </button>
+            <div className="check">
+              <input
+                type="checkbox"
+                checked={dificultat.direccio}
+                onChange={() =>
+                  setDificultat({
+                    ...dificultat,
+                    direccio: !dificultat.direccio,
+                  })
+                }
+              />
+              <label>Mostrar direcció</label>
+            </div>
+            <div className="check">
+              <input
+                type="checkbox"
+                checked={dificultat.pistes}
+                onChange={() =>
+                  setDificultat({ ...dificultat, pistes: !dificultat.pistes })
+                }
+              />
+              <label>Habilitar pistes</label>
+            </div>
           </div>
-        </div>
+        </Modal>
       )}
-      {showModalAjuda && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Com jugar</h2>
-            <p>
-              1. Escriu el nom del municipi, i selecciona'l a la llista
-              d'opcions. Si no el trobes, revisa si l'has escrit en la toponímia
-              oficial (No fiques "Játiva" o "Carcagente", fes el favor).
-            </p>
-            <p>
-              2. Si no has encertat, voràs a què distància i direcció es troba
-              el municipi seleccionar del de la imatge.
-            </p>
-            <p>
-              3. A partir del cinqué intent fallit, per cada intent següent
-              tindràs una pista opcional.
-            </p>
-            <button
-              className="boton-modal"
-              onClick={() => setShowModalAjuda(false)}
-            >
-              Anem-hi!
-            </button>
-          </div>
-        </div>
+      {modals.ajuda && (
+        <Modal
+          show={modals.ajuda}
+          onClose={() => toggleModal("ajuda")}
+          title="Com jugar"
+          btnText="Anem!"
+        >
+          <p>
+            1. Escriu el nom del municipi, i selecciona'l a la llista d'opcions.
+          </p>
+          <p>
+            2. Si no has encertat, voràs a què distància i direcció es troba.
+          </p>
+          <p>
+            3. A partir del cinqué intent fallit, tindràs una pista opcional.
+          </p>
+        </Modal>
       )}
-      {showModalRendirse && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>
-              {municipioDiario.municipio} ({municipioDiario.provincia})
-            </h2>
-            <button className="boton-modal" onClick={() => cargarMunicipio()}>
-              Torna a jugar
-            </button>
-          </div>
-        </div>
+      {modals.rendirse && (
+        <Modal
+          show={modals.rendirse}
+          onClose={() => {
+            toggleModal("rendirse");
+            cargarMunicipio();
+          }}
+          title={`${municipioDiario.municipio} (${municipioDiario.provincia})`}
+          btnText="Tornar a jugar"
+        ></Modal>
       )}
-      {showModalPista && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Pista {pistaIndex + 1}</h2>
-            {getPista()}
-            <button
-              className="boton-modal"
-              onClick={() => handleCloseModal(false)}
-            >
-              Tornar a provar
-            </button>
-          </div>
-        </div>
+      {modals.pista && (
+        <Modal
+          show={modals.pista}
+          onClose={handleCloseModal}
+          title={`Pista ${pistaIndex + 1}`}
+          btnText="Tornar a provar"
+        >
+          {getPista()}
+        </Modal>
       )}
     </main>
   );
