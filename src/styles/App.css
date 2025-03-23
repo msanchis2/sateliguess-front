@@ -20,10 +20,12 @@ main {
 
 h2 {
   margin-bottom: 8px;
+  text-align: center;
+  max-width: 475px;
 }
 
 footer {
-  color: white;
+  color: #FFF;
   margin-top: 38px;
   margin-bottom: 38px;
   font-size: 12px;
@@ -46,7 +48,7 @@ footer {
   gap: 8px;
   align-items: center;
   text-decoration: none;
-  color: white;
+  color: #FFF;
 }
 
 .icon {
@@ -76,7 +78,7 @@ footer {
 .ajuda {
   font-size: 32px;
   cursor: pointer;
-  color:rgb(15 23 42);
+  color: rgb(15 23 42);
 }
 
 .checks {
@@ -115,8 +117,8 @@ form {
   width: 100%;
   max-width: 600px;
   text-align: center;
-  border-bottom: 1px solid white;
-  color: white;
+  border-bottom: 1px solid #FFF;
+  color: #FFF;
   padding-bottom: 6px;
   padding-top: 18px;
   display: flex;
@@ -134,30 +136,28 @@ form {
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   width: 100%;
   max-width: 600px;
-
-  span {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
 }
 
 .win {
-  border: 6px solid;
-  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  border-image-slice: 1;
-  background-color: #FFF !important;
-  padding: 12px !important;
-  border-radius: 4px;
-  font-size: 20px;
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 6px solid transparent;
+  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1; 
+  background-color: #FFF;
+  padding: 12px;
+}
 
-  span {
-    font-weight: bold;
-  }
+.winMunicipi {
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .attempt {
@@ -168,8 +168,13 @@ form {
   width: 100%;
   max-width: 600px;
   padding: 8px;
-  background-color: #e5e7eb;
+  background-color: #FFF;
   border-radius: 4px;
+}
+
+.direccions {
+  min-width: 90px;
+  padding-right: 0;
 }
 
 .boton {
@@ -186,8 +191,8 @@ form {
 }
 
 .disabled {
-  color: #a0a0a0 !important;
-  border: 2px solid #a0a0a0 !important;
+  color: #666 !important;
+  border: 2px solid #666 !important;
   cursor: auto !important;
 }
 
@@ -203,9 +208,9 @@ form {
 }
 
 .container .searchInput {
-  background: #fff;
+  background: #FFF;
   width: 100%;
-  border-radius: 5px;
+  border-radius: 4px;
   position: relative;
   box-shadow: 0px 1px 5px 3px rgba(0, 0, 0, 0.12);
 }
@@ -215,14 +220,19 @@ form {
   width: 100%;
   outline: none;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   padding: 0 60px 0 20px;
   font-size: 18px;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
 }
 
+.searchInput input::placeholder {
+  color: #666;
+  font-style: italic;
+}
+
 .searchInput.active input {
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
 }
 
 .searchInput .resultBox {
@@ -232,11 +242,10 @@ form {
 
 .resultBox div {
   padding: 8px;
-  border-bottom: 1px solid e5e7eb;
 }
 
 .resultBox div:hover {
-  background-color: #e5e7eb;
+  background-color: #dbdbdb;
 }
 
 .searchInput.active .resultBox li {
@@ -244,7 +253,7 @@ form {
 }
 
 .resultBox li:hover {
-  background: #efefef;
+  background: #FFF;
 }
 
 .searchInput .icon {
@@ -275,9 +284,10 @@ form {
 
 .modal-content {
   max-width: 600px;
-  background-color: white;
+  min-width: 324px;
+  background-color: #FFF;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 8px;
   text-align: justify;
   display: flex;
   flex-direction: column;
@@ -286,10 +296,10 @@ form {
 
 .boton-modal {
   margin-top: 16px;
-  border: 2px solid black;
+  border: 2px solid #000;
   width: 175px;
   background-color: transparent;
-  color: black;
+  color: #000;
   border-radius: 4px;
   text-align: center;
   font-size: 18px;
@@ -298,12 +308,33 @@ form {
   cursor: pointer;
 }
 
+.zoom-slider {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+}
+
 .pista {
   margin-top: 8px;
+}
 
-  p {
-    margin-bottom: 4px;
-  }
+.paisos {
+  width: 186px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.seleccionat {
+  background-color: rgb(15 23 42);
+  border-radius: 16px;
+  color: white;
+  padding: 8px;
+  font-weight: bold;
+  min-width: 186px;
 }
 
 .intents {
@@ -311,21 +342,25 @@ form {
   font-weight: 300;
 }
 
-.leaflet-marker-icon .leaflet-zoom-animated .leaflet-interactive {
-  display: none;
-
+.leaflet-control, .leaflet-attribution-flag {
+  display: none !important;
 }
 
 @media (max-width: 430px) {
-  main{
+  main {
     height: 900px;
   }
+
   footer {
     font-size: 10.5px;
   }
 
   .boton {
     font-size: 15px;
+  }
+
+  .attempt {
+    font-size: 0.9rem;
   }
 
   .title {

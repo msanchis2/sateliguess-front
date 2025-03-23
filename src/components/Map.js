@@ -10,14 +10,14 @@ const mapContainerStyle = {
   margin: '0 auto',
 };
 
-const Map = ({ coordinates = [0, 0] }) => {
+const Map = ({ coordinates = [0, 0], zoom = 15 }) => {
   if(!coordinates) {
     return (<div></div>)
   }
   return (
     <MapContainer
       center={coordinates}
-      zoom={15}
+      zoom={zoom}
       style={mapContainerStyle}
       dragging={false} // Bloquea el arrastre del mapa
       scrollWheelZoom={false} // Bloquea zoom con la rueda del ratón

@@ -50,6 +50,7 @@ Pots modificar la dificultat a la configuració:
 ✅ Mostrar distància  
 ✅ Mostrar direcció  
 ✅ Permetre pistes  
+✅ Modificar el zoom
 
 ---
 

@@ -6,13 +6,24 @@ import Modal from "./components/Modal";
 import "./styles/App.css";
 
 const App = () => {
-  const route = "https://sateliguess-back-production.up.railway.app/api/";
+  const route = "http://localhost:3000/api/" //"https://sateliguess-back-production.up.railway.app/api/";
   const routeRef = useRef(route);
   const firstLoad = useRef(true);
+
+  const localPais = () => {
+    const paisCache = localStorage.getItem("pais");
+    if (paisCache) {
+      return paisCache;
+    }
+    return "ca"
+  }
 
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
   const [input, setInput] = useState("");
+  const [pais, setPais] = useState(localPais());
+  const [paisToChange, setPaisToChange] = useState(localPais());
+  const [pistaLletres, setPistaLletres] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
@@ -33,12 +44,11 @@ const App = () => {
   useEffect(() => {
     if (firstLoad.current) {
       setIsMobile((window.innerWidth <= 768))
-      nuevoMunicipio();
       firstLoad.current = false;
       const dificultatCache = localStorage.getItem("dificultat");
       dificultatCache
         ? setDificultat(JSON.parse(dificultatCache))
-        : setDificultat({ distancia: true, direccio: true, pistes: true });
+        : setDificultat({ distancia: true, direccio: true, pistes: true, zoom: 15 });
       console.log(`
          \\    /\\
           )  ( ')  Meow
@@ -49,6 +59,10 @@ const App = () => {
     `);
     }
   }, []);
+
+  useEffect(() => {
+    cargarMunicipio();
+  }, [pais])
 
   const toggleModal = (modal) => {
     setModals((prev) => ({ ...prev, [modal]: !prev[modal] }));
@@ -63,13 +77,14 @@ const App = () => {
 
   const nuevoMunicipio = () => {
     axios
-      .get(`${route}municipio-aleatorio`)
+      .get(`${route}municipio-aleatorio?p=${pais}`)
       .then((response) => {
         setMunicipioDiario(response.data);
         setCoordinates([
           parseFloat(response.data.latitud),
           parseFloat(response.data.longitud),
         ]);
+        setPistaLletres(generarPistaLletres(response.data.municipio))
       })
       .catch((error) =>
         console.error("Error al obtener el municipio diario:", error)
@@ -80,9 +95,9 @@ const App = () => {
   const handleInputChange = useCallback(
     debounce((value) => {
       if (value.length < 3) return setSuggestions([]);
-  
+
       axios
-        .get(`${routeRef.current}municipios/${value}`)
+        .get(`${routeRef.current}municipios/${value}?p=${pais}`)
         .then((response) => {
           const filteredSuggestions = response.data.filter(
             (m) =>
@@ -95,7 +110,7 @@ const App = () => {
         })
         .catch((error) => console.error("Error en la búsqueda:", error));
     }, 300),
-    [attempts] 
+    [attempts]
   );
 
   const onInputChange = (e) => {
@@ -203,20 +218,29 @@ const App = () => {
         return (
           <>
             <p>Provincia: {municipioDiario.provincia} </p>
-            <p>Primera lletra: {municipioDiario.municipio[0]}</p>
+            <p>Comcarca: {municipioDiario.comarca} </p>
           </>
         );
       case 2:
         return (
           <>
             <p>Provincia: {municipioDiario.provincia} </p>
-            <p> Nom: {generarPistaLletres(municipioDiario.municipio)}</p>
+            <p>Comcarca: {municipioDiario.comarca} </p>
+            <p>Nom: {pistaLletres}</p>
           </>
         );
       default:
         return "";
     }
   };
+
+  const changePais = () => {
+    toggleModal("regio");
+    if (paisToChange !== pais) {
+      setPais(paisToChange);
+      localStorage.setItem("pais", paisToChange)
+    }
+  }
 
   const handleCloseModal = () => {
     setModals((prev) => ({ ...prev, pista: false }));
@@ -225,9 +249,16 @@ const App = () => {
     }
   };
 
+  const getPaisName = (pname) => {
+    switch(pname) {
+      case 'pv': return 'del Pais Valencià'
+      case 'ca': return 'de Catalunya'
+    }
+  }
+
   return (
     <main>
-      <div className="title">
+      <header className="title">
         <div className="ajuda">
           <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
           <div>_</div>
@@ -237,9 +268,9 @@ const App = () => {
           <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
           <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
         </div>
-      </div>
+      </header>
       <div id="mapa">
-        <Map coordinates={coordinates} key={coordinates?.join(",")}/>
+        <Map coordinates={coordinates} key={coordinates?.join(",")} zoom={dificultat.zoom || 15} />
       </div>
       <div className="attempts">
         {attempts.length > 0 && (
@@ -247,7 +278,7 @@ const App = () => {
             {attempts.map((attempt, index) => (
               <div className="attempt" key={index}>
                 <span>❌ {attempt.nom}</span>
-                <span>
+                <span className="direccions">
                   {dificultat.distancia ? `${attempt.distancia} Km ` : " "}
                   {dificultat.direccio ? attempt.direccio : ""}
                 </span>
@@ -255,13 +286,14 @@ const App = () => {
             ))}
           </div>
         )}
-        {win && (
-          <div className="attempt win">
-            <span>✅ {municipioDiario.municipio}</span>
-            <span>Intents: {attempts.length + 1}</span>
-          </div>
-        )}
       </div>
+      {win && (
+        <div className="win">
+          <span className="winMunicipi">✅ {municipioDiario.municipio}</span>
+          <span>{municipioDiario.comarca} ({municipioDiario.provincia})</span>
+          <span>Intents emprats: {attempts.length + 1}</span>
+        </div>
+      )}
       <div className="container">
         {!win && (
           <form onSubmit={handleSubmit}>
@@ -270,14 +302,13 @@ const App = () => {
                 type="text"
                 value={input}
                 onChange={onInputChange}
-                placeholder="Escriu el nom del municipi..."
+                placeholder={`Municipi ${getPaisName(pais)}...`}
                 onFocus={() => {
-                  if(isMobile)
+                  if (isMobile)
                     window.scrollTo({
                       top: document.body.scrollHeight,
                       behavior: 'smooth',
                     });
-                    //window.scrollTo(0, document.body.scrollHeight);
                 }}
               />
               {suggestions.length > 0 && (
@@ -385,11 +416,14 @@ const App = () => {
       {modals.regio && (
         <Modal
           show={modals.regio}
-          onClose={() => toggleModal("regio")}
-          title="🚧 Proximament 🚧"
+          onClose={() => changePais()}
+          title="Selecciona mapa"
           btnText="D'acord"
         >
-          <p>Estem treballant en les versions de distints països i regions</p>
+          <div className="paisos">
+            <p onClick={() => setPaisToChange('ca')} className={paisToChange === 'ca' ? 'seleccionat' : ''}>Catalunya</p>
+            <p onClick={() => setPaisToChange('pv')} className={paisToChange === 'pv' ? 'seleccionat' : ''}>Pais Valencià</p>
+          </div>
         </Modal>
       )}
       {modals.dificultat && (
@@ -440,6 +474,23 @@ const App = () => {
               <label>Habilitar pistes</label>
             </div>
           </div>
+          {/* Barra deslizante para el zoom */}
+          <div className="zoom-slider">
+            <label>Zoom</label>
+            <input
+              type="range"
+              min="13"
+              max="18"
+              value={dificultat.zoom}
+              onChange={(e) =>
+                setDificultat({
+                  ...dificultat,
+                  zoom: parseInt(e.target.value, 10),
+                })
+              }
+            />
+            <span>{dificultat.zoom - 13}</span>
+          </div>
         </Modal>
       )}
       {modals.ajuda && (
@@ -467,9 +518,11 @@ const App = () => {
             toggleModal("rendirse");
             cargarMunicipio();
           }}
-          title={`${municipioDiario.municipio} (${municipioDiario.provincia})`}
+          title={`${municipioDiario.municipio}`}
           btnText="Tornar a jugar"
-        ></Modal>
+        >
+          <p>Provincia de {municipioDiario.provincia}</p>
+        </Modal>
       )}
       {modals.pista && (
         <Modal
