@@ -523,7 +523,7 @@ const App = () => {
           title={`${municipioDiario.municipio}`}
           btnText="Tornar a jugar"
         >
-          <p>Provincia de {municipioDiario.provincia}</p>
+          <p>{municipioDiario.comarca} ({municipioDiario.provincia})</p>
         </Modal>
       )}
       {modals.pista && (
