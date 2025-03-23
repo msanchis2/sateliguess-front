@@ -62,6 +62,7 @@ const App = () => {
 
   useEffect(() => {
     cargarMunicipio();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pais])
 
   const toggleModal = (modal) => {
@@ -253,6 +254,7 @@ const App = () => {
     switch(pname) {
       case 'pv': return 'del Pais Valencià'
       case 'ca': return 'de Catalunya'
+      default: return ''
     }
   }
 
