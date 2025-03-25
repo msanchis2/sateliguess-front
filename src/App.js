@@ -48,7 +48,7 @@ const App = () => {
       const dificultatCache = localStorage.getItem("dificultat");
       const paisCache = localStorage.getItem("pais");
       if(!paisCache) {
-        setModals({...modals, regio: true})
+        toggleModal("regio")
       }
       dificultatCache
         ? setDificultat(JSON.parse(dificultatCache))
