@@ -18,11 +18,11 @@ const App = () => {
     return "ca"
   }
 
+  const [pais, setPais] = useState(localPais());
+  const [paisToChange, setPaisToChange] = useState(localPais());
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
   const [input, setInput] = useState("");
-  const [pais, setPais] = useState(localPais());
-  const [paisToChange, setPaisToChange] = useState(localPais());
   const [pistaLletres, setPistaLletres] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [attempts, setAttempts] = useState([]);
@@ -46,6 +46,10 @@ const App = () => {
       setIsMobile((window.innerWidth <= 768))
       firstLoad.current = false;
       const dificultatCache = localStorage.getItem("dificultat");
+      const paisCache = localStorage.getItem("pais");
+      if(!paisCache) {
+        setModals({...modals, regio: true})
+      }
       dificultatCache
         ? setDificultat(JSON.parse(dificultatCache))
         : setDificultat({ distancia: true, direccio: true, pistes: true, zoom: 15 });
@@ -73,6 +77,7 @@ const App = () => {
     setAttempts([]);
     setWin(false);
     setGuess("");
+    setPistaIndex(0);
     nuevoMunicipio();
   };
 
