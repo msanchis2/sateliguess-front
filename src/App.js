@@ -1,25 +1,33 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { debounce } from "lodash";
+import { debounce, isEmpty } from "lodash";
 import Map from "./components/Map";
 import Modal from "./components/Modal";
 import "./styles/App.css";
+import {
+  distance,
+  generarPistaLletres,
+  getPaisName,
+  getPista,
+  localPais,
+} from "./lib/utils";
+import { Footer } from "./Footer";
+
+// Pots afegir més opcions de pais al final si vols ampliar el joc.
+// TODO: modificar el backend per obtenir el municipi aleatori?
+const opcionsPais = {
+  pv: { placeholder: "del Pais Valencià", nom: "Pais Valencià", id: "pv" },
+  ca: { placeholder: "de Catalunya", nom: "Catalunya", id: "ca" },
+  // pb: { placeholder: "del País Basc", nom: "País Basc", id: "pb" },
+};
 
 const App = () => {
-  const route = "https://sateliguess-back-production.up.railway.app/api/" //"http://localhost:3000/api/";
+  const route = "https://sateliguess-back-production.up.railway.app/api/"; //"http://localhost:3000/api/";
   const routeRef = useRef(route);
   const firstLoad = useRef(true);
 
-  const localPais = () => {
-    const paisCache = localStorage.getItem("pais");
-    if (paisCache) {
-      return paisCache;
-    }
-    return "ca"
-  }
-
-  const [pais, setPais] = useState(localPais());
-  const [paisToChange, setPaisToChange] = useState(localPais());
+  const [pais, setPais] = useState(localPais(opcionsPais));
+  const [paisToChange, setPaisToChange] = useState(localPais(opcionsPais));
   const [coordinates, setCoordinates] = useState(null);
   const [municipioDiario, setMunicipioDiario] = useState(null);
   const [input, setInput] = useState("");
@@ -32,27 +40,25 @@ const App = () => {
   const [pistaIndex, setPistaIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [win, setWin] = useState(false);
-  const [modals, setModals] = useState({
-    pistaGastada: false,
-    rendirse: false,
-    pista: false,
-    ajuda: false,
-    regio: false,
-    dificultat: false,
-  });
+  const [modal, setModal] = useState("");
 
   useEffect(() => {
     if (firstLoad.current) {
-      setIsMobile((window.innerWidth <= 768))
+      setIsMobile(window.innerWidth <= 768);
       firstLoad.current = false;
       const dificultatCache = localStorage.getItem("dificultat");
       const paisCache = localStorage.getItem("pais");
-      if(!paisCache) {
-        toggleModal("regio")
+      if (!paisCache) {
+        toggleModal("regio");
       }
       dificultatCache
         ? setDificultat(JSON.parse(dificultatCache))
-        : setDificultat({ distancia: true, direccio: true, pistes: true, zoom: 15 });
+        : setDificultat({
+            distancia: true,
+            direccio: true,
+            pistes: true,
+            zoom: 15,
+          });
       console.log(`
          \\    /\\
           )  ( ')  Meow
@@ -66,11 +72,11 @@ const App = () => {
 
   useEffect(() => {
     cargarMunicipio();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pais])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pais]);
 
   const toggleModal = (modal) => {
-    setModals((prev) => ({ ...prev, [modal]: !prev[modal] }));
+    setModal((prev) => (prev === modal ? "" : modal));
   };
 
   const cargarMunicipio = () => {
@@ -90,7 +96,7 @@ const App = () => {
           parseFloat(response.data.latitud),
           parseFloat(response.data.longitud),
         ]);
-        setPistaLletres(generarPistaLletres(response.data.municipio))
+        setPistaLletres(generarPistaLletres(response.data.municipio));
       })
       .catch((error) =>
         console.error("Error al obtener el municipio diario:", error)
@@ -128,45 +134,6 @@ const App = () => {
     setGuess(municipio);
     setInput(municipio.municipio);
     setSuggestions([]);
-  };
-
-  const toRadians = (degrees) => degrees * (Math.PI / 180);
-
-  const calcularDistancia = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = toRadians(lat2 - lat1);
-    const dLon = toRadians(lon2 - lon1);
-    const radLat1 = toRadians(lat1);
-    const radLat2 = toRadians(lat2);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  const calcularDireccio = (lat1, lon1, lat2, lon2) => {
-    const dLon = toRadians(lon2 - lon1);
-    const radLat1 = toRadians(lat1);
-    const radLat2 = toRadians(lat2);
-    const y = Math.sin(dLon) * Math.cos(radLat2);
-    const x =
-      Math.cos(radLat1) * Math.sin(radLat2) -
-      Math.sin(radLat1) * Math.cos(radLat2) * Math.cos(dLon);
-    let brng = (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
-    return ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️"][
-      Math.round(brng / 45)
-    ];
-  };
-
-  const distance = (municipio1, municipio2) => {
-    const lat1 = parseFloat(municipio1.latitud);
-    const lon1 = parseFloat(municipio1.longitud);
-    const lat2 = parseFloat(municipio2.latitud);
-    const lon2 = parseFloat(municipio2.longitud);
-    return {
-      distancia: calcularDistancia(lat1, lon1, lat2, lon2).toFixed(2),
-      direccio: calcularDireccio(lat1, lon1, lat2, lon2),
-    };
   };
 
   const handleSubmit = (e) => {
@@ -208,241 +175,66 @@ const App = () => {
     toggleModal(modal);
   };
 
-  const generarPistaLletres = (nom) => {
-    let lletres = nom.split("");
-    let indices = [...Array(nom.length).keys()]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 2);
-    return lletres.map((l, i) => (indices.includes(i) ? l : "_")).join("");
-  };
-
-  const getPista = () => {
-    switch (pistaIndex) {
-      case 0:
-        return <p>Provincia: {municipioDiario.provincia}</p>;
-      case 1:
-        return (
-          <>
-            <p>Provincia: {municipioDiario.provincia} </p>
-            <p>Comcarca: {municipioDiario.comarca} </p>
-          </>
-        );
-      case 2:
-        return (
-          <>
-            <p>Provincia: {municipioDiario.provincia} </p>
-            <p>Comcarca: {municipioDiario.comarca} </p>
-            <p>Nom: {pistaLletres}</p>
-          </>
-        );
-      default:
-        return "";
-    }
-  };
-
   const changePais = () => {
     toggleModal("regio");
     if (paisToChange !== pais) {
       setPais(paisToChange);
-      localStorage.setItem("pais", paisToChange)
+      localStorage.setItem("pais", paisToChange);
     }
-  }
+  };
 
   const handleCloseModal = () => {
-    setModals((prev) => ({ ...prev, pista: false }));
+    setModal("");
     if (pistaIndex < 2) {
       setPistaIndex(pistaIndex + 1);
     }
   };
 
-  const getPaisName = (pname) => {
-    switch(pname) {
-      case 'pv': return 'del Pais Valencià'
-      case 'ca': return 'de Catalunya'
-      default: return ''
-    }
-  }
-
-  return (
-    <main>
-      <header className="title">
-        <div className="ajuda">
-          <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
-          <div>_</div>
-        </div>
-        <h1>Sateliguess</h1>
-        <div className="regio">
-          <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
-          <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
-        </div>
-      </header>
-      <div id="mapa">
-        <Map coordinates={coordinates} key={coordinates?.join(",")} zoom={dificultat.zoom || 15} />
-      </div>
-      <div className="attempts">
-        {attempts.length > 0 && (
-          <div className="attempts">
-            {attempts.map((attempt, index) => (
-              <div className="attempt" key={index}>
-                <span>❌ {attempt.nom}</span>
-                <span className="direccions">
-                  {dificultat.distancia ? `${attempt.distancia} Km ` : " "}
-                  {dificultat.direccio ? attempt.direccio : ""}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      {win && (
-        <div className="win">
-          <span className="winMunicipi">✅ {municipioDiario.municipio}</span>
-          <span>{municipioDiario.comarca} ({municipioDiario.provincia})</span>
-          <span>Intents emprats: {attempts.length + 1}</span>
-        </div>
-      )}
-      <div className="container">
-        {!win && (
-          <form onSubmit={handleSubmit}>
-            <div className="searchInput">
-              <input
-                type="text"
-                value={input}
-                onChange={onInputChange}
-                placeholder={`Municipi ${getPaisName(pais)}...`}
-                onFocus={() => {
-                  if (isMobile)
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: 'smooth',
-                    });
-                }}
-              />
-              {suggestions.length > 0 && (
-                <div className="resultBox">
-                  {suggestions.map((m) => (
-                    <div key={m.id} onClick={() => handleSelectSuggestion(m)}>
-                      {m.municipio}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button type="submit" className="boton">
-              🔎 ENDEVINA
-            </button>
-            <div className="botones">
-              {dificultat.pistes && (
-                <button
-                  onClick={(e) => pista(e)}
-                  className={
-                    attempts.length < 5 || pistaGastada
-                      ? "boton disabled"
-                      : "boton"
-                  }
-                  disabled={attempts.length < 5 || pistaGastada}
-                >
-                  Pista{" "}
-                  <span className="intents">
-                    {attempts.length < 5 && `Intents: ${attempts.length}/5`}
-                  </span>
-                </button>
-              )}
-              <button onClick={() => toggleModal("rendirse")} className="boton">
-                Em rendisc
-              </button>
-            </div>
-          </form>
-        )}
-        {win && (
-          <button onClick={() => cargarMunicipio()} className="boton">
-            Carregar altre
-          </button>
-        )}
-      </div>
-      <footer>
-        <div className="xarxes">
-          <a
-            href="mailto:martisanchis2000@gmail.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img
-              className="icon2"
-              src="https://i.imgur.com/i1sA0YE.png"
-              alt="Email"
-            />
-          </a>
-          <a
-            href="https://github.com/msanchis2/sateliguess-front"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img
-              className="icon2"
-              src="https://img.icons8.com/ios11/512/FFFFFF/github.png"
-              alt="Github"
-            />
-          </a>
-          <a
-            href="https://www.linkedin.com/in/msanchis2/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img
-              className="icon"
-              src="https://i.imgur.com/58x5aRC.png"
-              alt="Linkedin"
-            />
-          </a>
-          <div>{" "}</div>
-          <a
-            href="https://www.Ko-fi.com/martisanchis"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <img
-              className="icon3"
-              src="https://i.imgur.com/45x8o2E.png"
-              alt="Kofi"
-            />
-            <span>{"Dona'm suport"}</span>
-          </a>
-        </div>
-        <span>
-          © 2025 Martí Sanchis Román - Codi obert baix llicència{" "}
-          <a
-            href="https://www.gnu.org/licenses/gpl-3.0.html"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GPLv3
-          </a>
-        </span>
-      </footer>
-      {modals.regio && (
-        <Modal
-          show={modals.regio}
-          onClose={() => changePais()}
-          title="Selecciona mapa"
-          btnText="D'acord"
-        >
-          <div className="paisos">
-            <p onClick={() => setPaisToChange('ca')} className={paisToChange === 'ca' ? 'seleccionat' : ''}>Catalunya</p>
-            <p onClick={() => setPaisToChange('pv')} className={paisToChange === 'pv' ? 'seleccionat' : ''}>Pais Valencià</p>
-          </div>
-        </Modal>
-      )}
-      {modals.dificultat && (
-        <Modal
-          show={modals.dificultat}
-          onClose={() => {
-            toggleModal("dificultat");
-            localStorage.setItem("dificultat", JSON.stringify(dificultat));
-          }}
-          title="Configura la dificultat"
-          btnText="D'acord"
-        >
+  // Centralitzem totes les configuracions relacionades amb el modal
+  const modalConfig = {
+    rendirse: {
+      show: modal === "rendirse",
+      onClose: () => {
+        toggleModal("rendirse");
+        cargarMunicipio();
+      },
+      title: `${municipioDiario?.municipio}`,
+      btnText: "Tornar a jugar",
+      children: (
+        <p>
+          {municipioDiario?.comarca} ({municipioDiario?.provincia})
+        </p>
+      ),
+    },
+    ajuda: {
+      show: modal === "ajuda",
+      onClose: () => toggleModal("ajuda"),
+      title: "Com jugar",
+      btnText: "Anem!",
+      children: (
+        <>
+          <p>
+            1. Escriu el nom del municipi, i selecciona'l a la llista d'opcions.
+          </p>
+          <p>
+            2. Si no has encertat, voràs a què distància i direcció es troba.
+          </p>
+          <p>
+            3. A partir del cinqué intent fallit, tindràs una pista opcional.
+          </p>
+        </>
+      ),
+    },
+    dificultat: {
+      show: modal === "dificultat",
+      onClose: () => {
+        toggleModal("dificultat");
+        localStorage.setItem("dificultat", JSON.stringify(dificultat));
+      },
+      title: "Configura la dificultat",
+      btnText: "D'acord",
+      children: (
+        <>
           <div className="checks">
             <div className="check">
               <input
@@ -498,47 +290,153 @@ const App = () => {
             />
             <span>{dificultat.zoom - 13}</span>
           </div>
-        </Modal>
+        </>
+      ),
+    },
+    pista: {
+      show: modal === "pista",
+      onClose: () => handleCloseModal(),
+      title: `Pista ${pistaIndex + 1}`,
+      btnText: "Tornar a provar",
+      children: getPista(pistaIndex, municipioDiario, pistaLletres),
+    },
+    regio: {
+      show: modal === "regio",
+      onClose: () => changePais(),
+      title: "Selecciona mapa",
+      btnText: "D'acord",
+      children: (
+        <div className="paisos">
+          {Object.values(opcionsPais).map((pais) => (
+            <p
+              key={pais.id}
+              onClick={() => setPaisToChange(pais.id)}
+              className={paisToChange === pais.id ? "seleccionat" : ""}
+            >
+              {pais.nom}
+            </p>
+          ))}
+        </div>
+      ),
+    },
+  };
+
+  return (
+    <main>
+      <header className="title">
+        <div className="ajuda">
+          <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
+          <div>_</div>
+        </div>
+        <h1>Sateliguess</h1>
+        <div className="regio">
+          <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
+          <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
+        </div>
+      </header>
+      <div id="mapa">
+        <Map
+          coordinates={coordinates}
+          key={coordinates?.join(",")}
+          zoom={dificultat.zoom || 15}
+        />
+      </div>
+      <div className="attempts">
+        {attempts.length > 0 && (
+          <div className="attempts">
+            {attempts.map((attempt, index) => (
+              <div className="attempt" key={index}>
+                <span>❌ {attempt.nom}</span>
+                <span className="direccions">
+                  {dificultat.distancia ? `${attempt.distancia} Km ` : " "}
+                  {dificultat.direccio ? attempt.direccio : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {win && (
+        <div className="win">
+          <span className="winMunicipi">✅ {municipioDiario.municipio}</span>
+          <span>
+            {municipioDiario.comarca} ({municipioDiario.provincia})
+          </span>
+          <span>Intents emprats: {attempts.length + 1}</span>
+        </div>
       )}
-      {modals.ajuda && (
+      <div className="container">
+        {!win && (
+          <form onSubmit={handleSubmit}>
+            <div className="searchInput">
+              <input
+                type="text"
+                value={input}
+                onChange={onInputChange}
+                placeholder={`Municipi ${
+                  getPaisName(pais, opcionsPais).placeholder
+                }...`}
+                onFocus={() => {
+                  if (isMobile)
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    });
+                }}
+              />
+              {suggestions.length > 0 && (
+                <div className="resultBox">
+                  {suggestions.map((m) => (
+                    <div key={m.id} onClick={() => handleSelectSuggestion(m)}>
+                      {m.municipio}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button type="submit" className="boton">
+              🔎 ENDEVINA
+            </button>
+            <div className="botones">
+              {dificultat.pistes && (
+                <button
+                  onClick={(e) => pista(e)}
+                  className={
+                    attempts.length < 5 || pistaGastada
+                      ? "boton disabled"
+                      : "boton"
+                  }
+                  disabled={attempts.length < 5 || pistaGastada}
+                >
+                  Pista{" "}
+                  <span className="intents">
+                    {attempts.length < 5 && `Intents: ${attempts.length}/5`}
+                  </span>
+                </button>
+              )}
+              <button onClick={() => toggleModal("rendirse")} className="boton">
+                Em rendisc
+              </button>
+            </div>
+          </form>
+        )}
+        {win && (
+          <button onClick={() => cargarMunicipio()} className="boton">
+            Carregar altre
+          </button>
+        )}
+      </div>
+      <footer>
+        <Footer />
+      </footer>
+      {!isEmpty(modal) && (
         <Modal
-          show={modals.ajuda}
-          onClose={() => toggleModal("ajuda")}
-          title="Com jugar"
-          btnText="Anem!"
+          show={modalConfig[modal].show}
+          onClose={modalConfig[modal].onClose}
+          title={modalConfig[modal].title}
+          btnText={modalConfig[modal].btnText}
         >
-          <p>
-            1. Escriu el nom del municipi, i selecciona'l a la llista d'opcions.
-          </p>
-          <p>
-            2. Si no has encertat, voràs a què distància i direcció es troba.
-          </p>
-          <p>
-            3. A partir del cinqué intent fallit, tindràs una pista opcional.
-          </p>
-        </Modal>
-      )}
-      {modals.rendirse && (
-        <Modal
-          show={modals.rendirse}
-          onClose={() => {
-            toggleModal("rendirse");
-            cargarMunicipio();
-          }}
-          title={`${municipioDiario.municipio}`}
-          btnText="Tornar a jugar"
-        >
-          <p>{municipioDiario.comarca} ({municipioDiario.provincia})</p>
-        </Modal>
-      )}
-      {modals.pista && (
-        <Modal
-          show={modals.pista}
-          onClose={() => handleCloseModal()}
-          title={`Pista ${pistaIndex + 1}`}
-          btnText="Tornar a provar"
-        >
-          {getPista()}
+          {modalConfig[modal]?.children}
         </Modal>
       )}
     </main>
