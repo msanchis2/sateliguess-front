@@ -1,4 +1,7 @@
-export const distance = (municipio1, municipio2) => {
+import React from "react";
+import { IMunicipio, IPais, TKeyPais, TConfigOpcionsPais } from "../../types";
+
+export const distance = (municipio1: IMunicipio, municipio2: IMunicipio) => {
   const lat1 = parseFloat(municipio1.latitud);
   const lon1 = parseFloat(municipio1.longitud);
   const lat2 = parseFloat(municipio2.latitud);
@@ -9,9 +12,14 @@ export const distance = (municipio1, municipio2) => {
   };
 };
 
-const toRadians = (degrees) => degrees * (Math.PI / 180);
+const toRadians = (degrees: number) => degrees * (Math.PI / 180);
 
-export const calcularDistancia = (lat1, lon1, lat2, lon2) => {
+export const calcularDistancia = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
   const R = 6371;
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
@@ -23,7 +31,12 @@ export const calcularDistancia = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-export const calcularDireccio = (lat1, lon1, lat2, lon2) => {
+export const calcularDireccio = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
   const dLon = toRadians(lon2 - lon1);
   const radLat1 = toRadians(lat1);
   const radLat2 = toRadians(lat2);
@@ -37,7 +50,7 @@ export const calcularDireccio = (lat1, lon1, lat2, lon2) => {
   ];
 };
 
-export const generarPistaLletres = (nom) => {
+export const generarPistaLletres = (nom: string) => {
   let lletres = nom.split("");
   let indices = [...Array(nom.length).keys()]
     .sort(() => Math.random() - 0.5)
@@ -45,7 +58,11 @@ export const generarPistaLletres = (nom) => {
   return lletres.map((l, i) => (indices.includes(i) ? l : "_")).join("");
 };
 
-export const getPista = (pistaIndex, municipioDiario, pistaLletres) => {
+export const getPista = (
+  pistaIndex: number,
+  municipioDiario: IMunicipio,
+  pistaLletres: string
+) => {
   if (pistaIndex === undefined || pistaIndex === null || !municipioDiario)
     return "";
   switch (pistaIndex) {
@@ -71,24 +88,43 @@ export const getPista = (pistaIndex, municipioDiario, pistaLletres) => {
   }
 };
 
-export const getPaisName = (pname, opcionsPais) => {
+export const getPais = (
+  pname: keyof TConfigOpcionsPais,
+  opcionsPais: TConfigOpcionsPais
+): IPais => {
   return opcionsPais[pname];
 };
 
-export const localPais = (opcionsPais) => {
-  if (!opcionsPais || Object.keys(opcionsPais).length === 0) {
-    return "ca"; // Retornem "ca" si opcioionsPais està buit o no existeix.
-  }
-  const paisCache = localStorage.getItem("pais");
+const isTCountries = (
+  paisCache: string | null,
+  opcionsPais: TConfigOpcionsPais
+): paisCache is TKeyPais => {
+  if (!paisCache) return false;
+  return Object.keys(opcionsPais).includes(paisCache);
+};
 
+export const localPais = (opcionsPais: TConfigOpcionsPais): TKeyPais => {
+  const fallBackLanguage: TKeyPais = "ca";
+  if (!opcionsPais || Object.keys(opcionsPais).length === 0) {
+    return fallBackLanguage; // Retornem "ca" si opcioionsPais està buit o no existeix.
+  }
+
+  const paisCache = localStorage.getItem("pais");
   // Verificar si el pais del caché existeix a les opcions.
   // Sino es així, retornar el primer pais de les opcions.
   // En cas contrari, tenim per defecte 'ca'.
-  if (paisCache && Object.keys(opcionsPais).includes(paisCache)) {
+  if (
+    paisCache &&
+    isTCountries(paisCache, opcionsPais) &&
+    Object.keys(opcionsPais).includes(paisCache)
+  ) {
     return paisCache;
   }
-
-  const defaultPais = Object.keys(opcionsPais)[0] || "ca"; // Default to "ca" if opcionsPais.ca is undefined
+  const firstOption = Object.keys(opcionsPais)[0];
+  const defaultPais =
+    firstOption && isTCountries(firstOption, opcionsPais)
+      ? firstOption
+      : fallBackLanguage; // Default to "ca"
   localStorage.setItem("pais", defaultPais);
   return defaultPais;
 };

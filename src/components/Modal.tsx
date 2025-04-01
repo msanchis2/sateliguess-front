@@ -1,8 +1,13 @@
 import React from "react";
 
-const Modal = ({ show, onClose, title, children, btnText }) => {
-  if (!show) return null;
+export interface IModalProps {
+  onClose: () => void;
+  title: string;
+  btnText: string;
+  children: React.ReactNode;
+}
 
+const Modal: React.FC<IModalProps> = ({ onClose, title, children, btnText }) => {
   return (
     <div className="modal">
       <div className="modal-content">

@@ -1,96 +1,58 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import { debounce, isEmpty } from "lodash";
-import Map from "./components/Map";
-import Modal from "./components/Modal";
+import axios, { AxiosResponse } from "axios";
+import { debounce, isEmpty, isNull } from "lodash";
 import "./styles/App.css";
 import {
   distance,
   generarPistaLletres,
-  getPaisName,
+  getPais,
   getPista,
   localPais,
 } from "./lib/utils";
 import { Footer } from "./Footer";
+import { IAttempt, IDificultat, IMunicipio, TKeyPais, TModal } from "./types";
+import Map from "./components/Map";
+import Modal, { IModalProps } from "./components/Modal";
+import { dificultatInicial, opcionsPais } from "./config";
 
-// Pots afegir més opcions de pais al final si vols ampliar el joc.
-// TODO: modificar el backend per obtenir el municipi aleatori?
-const opcionsPais = {
-  pv: { placeholder: "del Pais Valencià", nom: "Pais Valencià", id: "pv" },
-  ca: { placeholder: "de Catalunya", nom: "Catalunya", id: "ca" },
-  // pb: { placeholder: "del País Basc", nom: "País Basc", id: "pb" },
-};
-
-const App = () => {
+const App: React.FC = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/"; //"http://localhost:3000/api/";
   const routeRef = useRef(route);
   const firstLoad = useRef(true);
 
-  const [pais, setPais] = useState(localPais(opcionsPais));
-  const [paisToChange, setPaisToChange] = useState(localPais(opcionsPais));
-  const [coordinates, setCoordinates] = useState(null);
-  const [municipioDiario, setMunicipioDiario] = useState(null);
+  const [pais, setPais] = useState<TKeyPais>(localPais(opcionsPais));
+  const [paisToChange, setPaisToChange] = useState<TKeyPais>(
+    localPais(opcionsPais)
+  );
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [municipioDiario, setMunicipioDiario] = useState<IMunicipio | null>(
+    null
+  );
   const [input, setInput] = useState("");
   const [pistaLletres, setPistaLletres] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [attempts, setAttempts] = useState([]);
-  const [guess, setGuess] = useState("");
+  const [suggestions, setSuggestions] = useState<IMunicipio[]>([]);
+  const [attempts, setAttempts] = useState<IAttempt[]>([]);
+  const [guess, setGuess] = useState<IMunicipio | null>(null);
   const [pistaGastada, setPistaGastada] = useState(false);
-  const [dificultat, setDificultat] = useState({});
+  const [dificultat, setDificultat] = useState<IDificultat>(dificultatInicial);
   const [pistaIndex, setPistaIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [win, setWin] = useState(false);
-  const [modal, setModal] = useState("");
+  const [modal, setModal] = useState<TModal | null>(null);
 
-  useEffect(() => {
-    if (firstLoad.current) {
-      setIsMobile(window.innerWidth <= 768);
-      firstLoad.current = false;
-      const dificultatCache = localStorage.getItem("dificultat");
-      const paisCache = localStorage.getItem("pais");
-      if (!paisCache) {
-        toggleModal("regio");
-      }
-      dificultatCache
-        ? setDificultat(JSON.parse(dificultatCache))
-        : setDificultat({
-            distancia: true,
-            direccio: true,
-            pistes: true,
-            zoom: 15,
-          });
-      console.log(`
-         \\    /\\
-          )  ( ')  Meow
-          (  /  )
-           \\(__)|
-
-    Cigró diu hola!
-    `);
-    }
-  }, []);
-
-  useEffect(() => {
-    cargarMunicipio();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pais]);
-
-  const toggleModal = (modal) => {
-    setModal((prev) => (prev === modal ? "" : modal));
-  };
-
-  const cargarMunicipio = () => {
+  const cargarMunicipio = useCallback(async () => {
     setAttempts([]);
     setWin(false);
-    setGuess("");
+    setGuess(null);
     setPistaIndex(0);
     nuevoMunicipio();
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pais]);
 
   const nuevoMunicipio = () => {
     axios
       .get(`${route}municipio-aleatorio?p=${pais}`)
-      .then((response) => {
+      .then((response: AxiosResponse<IMunicipio>) => {
         setMunicipioDiario(response.data);
         setCoordinates([
           parseFloat(response.data.latitud),
@@ -103,18 +65,53 @@ const App = () => {
       );
   };
 
+  useEffect(() => {
+    if (firstLoad.current) {
+      setIsMobile(window.innerWidth <= 768);
+      firstLoad.current = false;
+      const dificultatCache = localStorage.getItem("dificultat");
+      const paisCache = localStorage.getItem("pais");
+      if (!paisCache) {
+        toggleModal("regio");
+      }
+      setDificultat(
+        dificultatCache ? JSON.parse(dificultatCache) : dificultatInicial
+      );
+
+      console.log(`
+         \\    /\\
+          )  ( ')  Meow
+          (  /  )
+           \\(__)|
+
+    Cigró diu hola!
+    `);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isEmpty(pais)) {
+      cargarMunicipio();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pais]);
+
+  const toggleModal = (modal: TModal) => {
+    setModal((prev) => (prev === modal ? null : modal));
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleInputChange = useCallback(
-    debounce((value) => {
+    debounce((value: string) => {
       if (value.length < 3) return setSuggestions([]);
 
       axios
         .get(`${routeRef.current}municipios/${value}?p=${pais}`)
-        .then((response) => {
+        .then((response: AxiosResponse<IMunicipio[]>) => {
           const filteredSuggestions = response.data.filter(
-            (m) =>
+            (m: IMunicipio) =>
               !attempts.some(
-                (attempt) =>
+                (attempt: IAttempt) =>
                   attempt.nom.toLowerCase() === m.municipio.toLowerCase()
               )
           );
@@ -125,20 +122,20 @@ const App = () => {
     [attempts]
   );
 
-  const onInputChange = (e) => {
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
     handleInputChange(e.target.value);
   };
 
-  const handleSelectSuggestion = (municipio) => {
+  const handleSelectSuggestion = (municipio: IMunicipio) => {
     setGuess(municipio);
     setInput(municipio.municipio);
     setSuggestions([]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!municipioDiario || !guess.municipio) return;
+    if (!municipioDiario || !guess?.municipio) return;
 
     const { distancia, direccio } = distance(municipioDiario, guess);
     setPistaGastada(false);
@@ -150,7 +147,7 @@ const App = () => {
     } else {
       if (
         !attempts.some(
-          (a) => a.nom.toLowerCase() === guess.municipio.toLowerCase()
+          (a: IAttempt) => a.nom.toLowerCase() === guess.municipio.toLowerCase()
         )
       ) {
         setAttempts((prev) => [
@@ -161,16 +158,16 @@ const App = () => {
     }
 
     setInput("");
-    setGuess("");
+    setGuess(null);
   };
 
-  const pista = (e) => {
+  const pista = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setPistaGastada(true);
     toggleModal("pista");
   };
 
-  const openModal = (e, modal) => {
+  const openModal = (e: React.MouseEvent<HTMLDivElement>, modal: TModal) => {
     e.preventDefault();
     toggleModal(modal);
   };
@@ -184,16 +181,15 @@ const App = () => {
   };
 
   const handleCloseModal = () => {
-    setModal("");
+    setModal(null);
     if (pistaIndex < 2) {
       setPistaIndex(pistaIndex + 1);
     }
   };
 
   // Centralitzem totes les configuracions relacionades amb el modal
-  const modalConfig = {
+  const modalConfig: Record<TModal, IModalProps> = {
     rendirse: {
-      show: modal === "rendirse",
       onClose: () => {
         toggleModal("rendirse");
         cargarMunicipio();
@@ -207,7 +203,6 @@ const App = () => {
       ),
     },
     ajuda: {
-      show: modal === "ajuda",
       onClose: () => toggleModal("ajuda"),
       title: "Com jugar",
       btnText: "Anem!",
@@ -226,7 +221,6 @@ const App = () => {
       ),
     },
     dificultat: {
-      show: modal === "dificultat",
       onClose: () => {
         toggleModal("dificultat");
         localStorage.setItem("dificultat", JSON.stringify(dificultat));
@@ -239,7 +233,7 @@ const App = () => {
             <div className="check">
               <input
                 type="checkbox"
-                checked={dificultat.distancia}
+                checked={dificultat?.distancia}
                 onChange={() =>
                   setDificultat({
                     ...dificultat,
@@ -294,14 +288,14 @@ const App = () => {
       ),
     },
     pista: {
-      show: modal === "pista",
       onClose: () => handleCloseModal(),
       title: `Pista ${pistaIndex + 1}`,
       btnText: "Tornar a provar",
-      children: getPista(pistaIndex, municipioDiario, pistaLletres),
+      children: municipioDiario
+        ? getPista(pistaIndex, municipioDiario, pistaLletres)
+        : null,
     },
     regio: {
-      show: modal === "regio",
       onClose: () => changePais(),
       title: "Selecciona mapa",
       btnText: "D'acord",
@@ -310,7 +304,7 @@ const App = () => {
           {Object.values(opcionsPais).map((pais) => (
             <p
               key={pais.id}
-              onClick={() => setPaisToChange(pais.id)}
+              onClick={() => setPaisToChange(pais.id as TKeyPais)}
               className={paisToChange === pais.id ? "seleccionat" : ""}
             >
               {pais.nom}
@@ -358,9 +352,9 @@ const App = () => {
       </div>
       {win && (
         <div className="win">
-          <span className="winMunicipi">✅ {municipioDiario.municipio}</span>
+          <span className="winMunicipi">✅ {municipioDiario?.municipio}</span>
           <span>
-            {municipioDiario.comarca} ({municipioDiario.provincia})
+            {municipioDiario?.comarca} ({municipioDiario?.provincia})
           </span>
           <span>Intents emprats: {attempts.length + 1}</span>
         </div>
@@ -374,7 +368,7 @@ const App = () => {
                 value={input}
                 onChange={onInputChange}
                 placeholder={`Municipi ${
-                  getPaisName(pais, opcionsPais).placeholder
+                  getPais(pais, opcionsPais).placeholder
                 }...`}
                 onFocus={() => {
                   if (isMobile)
@@ -429,9 +423,8 @@ const App = () => {
       <footer>
         <Footer />
       </footer>
-      {!isEmpty(modal) && (
+      {!isNull(modal) && (
         <Modal
-          show={modalConfig[modal].show}
           onClose={modalConfig[modal].onClose}
           title={modalConfig[modal].title}
           btnText={modalConfig[modal].btnText}
@@ -442,5 +435,4 @@ const App = () => {
     </main>
   );
 };
-
 export default App;
