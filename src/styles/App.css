@@ -175,6 +175,14 @@ form {
 .direccions {
   min-width: 90px;
   padding-right: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: right;
+  gap: 8px;
+}
+.fletxa{
+  font-size: 1.35rem;
 }
 
 .boton {
@@ -281,7 +289,10 @@ form {
   align-items: center;
   z-index: 1000;
 }
-
+.modal-body{
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
 .modal-content {
   max-width: 600px;
   min-width: 324px;

@@ -212,7 +212,7 @@ const App: React.FC = () => {
             1. Escriu el nom del municipi, i selecciona'l a la llista d'opcions.
           </p>
           <p>
-            2. Si no has encertat, voràs a què distància i direcció es troba.
+            2. Si no has encertat, veuràs a què distància i direcció es troba.
           </p>
           <p>
             3. A partir del cinqué intent fallit, tindràs una pista opcional.
@@ -341,10 +341,10 @@ const App: React.FC = () => {
             {attempts.map((attempt, index) => (
               <div className="attempt" key={index}>
                 <span>❌ {attempt.nom}</span>
-                <span className="direccions">
-                  {dificultat.distancia ? `${attempt.distancia} Km ` : " "}
-                  {dificultat.direccio ? attempt.direccio : ""}
-                </span>
+                <div className="direccions">
+                  <span>{dificultat.distancia ? `${attempt.distancia} Km ` : " "}</span>
+                  <span className="fletxa">{dificultat.direccio ? attempt.direccio : ""}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -416,7 +416,7 @@ const App: React.FC = () => {
         )}
         {win && (
           <button onClick={() => cargarMunicipio()} className="boton">
-            Carregar altre
+            Carrega'n un altre
           </button>
         )}
       </div>

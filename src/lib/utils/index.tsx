@@ -44,10 +44,11 @@ export const calcularDireccio = (
   const x =
     Math.cos(radLat1) * Math.sin(radLat2) -
     Math.sin(radLat1) * Math.cos(radLat2) * Math.cos(dLon);
-  let brng = (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
-  return ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️"][
-    Math.round(brng / 45)
-  ];
+  let brng = Math.round(((Math.atan2(y, x) * (180 / Math.PI) + 360) % 360) / 45);
+  if(brng === 8) {
+    brng = Math.floor(((Math.atan2(y, x) * (180 / Math.PI) + 360) % 360) / 45);
+  }
+  return ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️"][brng];
 };
 
 export const generarPistaLletres = (nom: string) => {

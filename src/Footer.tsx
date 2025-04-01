@@ -61,6 +61,7 @@ export const Footer: React.FC = () => {
           GPLv3
         </a>
       </span>
+      <span>Versió 1.0.2</span>
     </>
   );
 };
