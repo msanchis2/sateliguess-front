@@ -1,4 +1,5 @@
 import React from "react";
+import pkg from '../package.json'
 
 export const Footer: React.FC = () => {
   return (
@@ -52,7 +53,8 @@ export const Footer: React.FC = () => {
         </a>
       </div>
       <span>
-        © 2025 Martí Sanchis Román - Codi obert baix llicència{" "}
+        © {new Date().getFullYear()} Martí Sanchis Román - Codi obert baix
+        llicència{" "}
         <a
           href="https://www.gnu.org/licenses/gpl-3.0.html"
           target="_blank"
@@ -61,7 +63,7 @@ export const Footer: React.FC = () => {
           GPLv3
         </a>
       </span>
-      <span>Versió 1.0.2</span>
+      <span>Versió {pkg.version}</span>
     </>
   );
 };

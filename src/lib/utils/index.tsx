@@ -1,6 +1,7 @@
 import React from "react";
 import { IMunicipio, IPais, TKeyPais, TConfigOpcionsPais } from "../../types";
 
+
 export const distance = (municipio1: IMunicipio, municipio2: IMunicipio) => {
   const lat1 = parseFloat(municipio1.latitud);
   const lon1 = parseFloat(municipio1.longitud);
