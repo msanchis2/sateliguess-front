@@ -358,7 +358,7 @@ const App: React.FC = () => {
         <div className="win">
           <span className="winMunicipi">✅ {municipioDiario?.municipio}</span>
           <span>
-            {municipioDiario?.comarca} ({municipioDiario?.provincia})
+            {municipioDiario?.comarca} {municipioDiario?.provincia && `(${municipioDiario?.provincia})`}
           </span>
           <span>Intents emprats: {attempts.length + 1}</span>
         </div>
