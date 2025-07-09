@@ -182,7 +182,11 @@ const App: React.FC = () => {
 
   const handleCloseModal = () => {
     setModal(null);
-    if (pistaIndex < 2) {
+    if(pistaIndex < 1 && pais === "ib") {
+      setPistaIndex(pistaIndex + 1);
+      return;
+    }
+    if (pistaIndex < 2 && pais !== "ib") {
       setPistaIndex(pistaIndex + 1);
     }
   };

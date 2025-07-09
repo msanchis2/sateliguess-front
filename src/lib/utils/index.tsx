@@ -1,4 +1,4 @@
-import React from "react";
+import React, { JSX } from "react";
 import { IMunicipio, IPais, TKeyPais, TConfigOpcionsPais } from "../../types";
 
 
@@ -65,30 +65,39 @@ export const getPista = (
   municipioDiario: IMunicipio,
   pistaLletres: string
 ) => {
-  if (pistaIndex === undefined || pistaIndex === null || !municipioDiario)
+  if (
+    pistaIndex === undefined ||
+    pistaIndex === null ||
+    !municipioDiario
+  ) {
     return "";
-  switch (pistaIndex) {
-    case 0:
-      return <p>Provincia: {municipioDiario?.provincia}</p>;
-    case 1:
-      return (
-        <>
-          <p>Provincia: {municipioDiario?.provincia}</p>
-          <p>Comarca: {municipioDiario?.comarca}</p>
-        </>
-      );
-    case 2:
-      return (
-        <>
-          <p>Provincia: {municipioDiario?.provincia}</p>
-          <p>Comarca: {municipioDiario?.comarca}</p>
-          <p>Nom: {pistaLletres}</p>
-        </>
-      );
-    default:
-      return "";
   }
+
+  const { provincia, comarca } = municipioDiario;
+  const mostrarProvincia = Boolean(provincia);
+  const pistas: JSX.Element[] = [];
+
+  if (mostrarProvincia && pistaIndex >= 0) {
+    pistas.push(<p key="provincia">Provincia: {provincia}</p>);
+  }
+
+  if (
+    (mostrarProvincia && pistaIndex >= 1) ||
+    (!mostrarProvincia && pistaIndex >= 0)
+  ) {
+    pistas.push(<p key="comarca">Comarca: {comarca}</p>);
+  }
+
+  if (
+    (mostrarProvincia && pistaIndex >= 2) ||
+    (!mostrarProvincia && pistaIndex >= 1)
+  ) {
+    pistas.push(<p key="nom">Nom: {pistaLletres}</p>);
+  }
+
+  return <>{pistas}</>;
 };
+
 
 export const getPais = (
   pname: keyof TConfigOpcionsPais,
