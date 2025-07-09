@@ -16,7 +16,7 @@ import Modal, { IModalProps } from "./components/Modal";
 import { dificultatInicial, opcionsPais } from "./config";
 
 const App: React.FC = () => {
-  const route = "http://localhost:3000/api/"; //"https://sateliguess-back-production.up.railway.app/api/";
+  const route = "https://sateliguess-back-production.up.railway.app/api/"; //http://localhost:3000/api/
   const routeRef = useRef(route);
   const firstLoad = useRef(true);
 
