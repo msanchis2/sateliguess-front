@@ -16,7 +16,7 @@ import Modal, { IModalProps } from "./components/Modal";
 import { dificultatInicial, opcionsPais } from "./config";
 
 const App: React.FC = () => {
-  const route = "https://sateliguess-back-production.up.railway.app/api/"; //"http://localhost:3000/api/";
+  const route = "http://localhost:3000/api/"; //"https://sateliguess-back-production.up.railway.app/api/";
   const routeRef = useRef(route);
   const firstLoad = useRef(true);
 
@@ -61,7 +61,7 @@ const App: React.FC = () => {
         setPistaLletres(generarPistaLletres(response.data.municipio));
       })
       .catch((error) =>
-        console.error("Error al obtener el municipio diario:", error)
+        console.error("Error al obtener el municipio:", error)
       );
   };
 
@@ -198,7 +198,7 @@ const App: React.FC = () => {
       btnText: "Tornar a jugar",
       children: (
         <p>
-          {municipioDiario?.comarca} ({municipioDiario?.provincia})
+          {municipioDiario?.comarca} {municipioDiario?.provincia && `(${municipioDiario?.provincia})`}
         </p>
       ),
     },
