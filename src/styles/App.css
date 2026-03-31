@@ -12,12 +12,6 @@ body {
   padding: 0 20px;
 }
 
-main {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-}
-
 h2 {
   margin-bottom: 8px;
   text-align: center;
@@ -33,6 +27,23 @@ footer {
   flex-direction: column;
   gap: 12px;
   text-align: center;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.addDesktop {
+  display: flex;
+  justify-content: center;
+  margin-top: 80px;
 }
 
 .xarxes {
@@ -150,7 +161,7 @@ form {
   flex-direction: column;
   gap: 6px;
   border: 6px solid transparent;
-  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1; 
+  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
   background-color: #FFF;
   padding: 12px;
 }
@@ -182,7 +193,8 @@ form {
   justify-content: right;
   gap: 8px;
 }
-.fletxa{
+
+.fletxa {
   font-size: 1.35rem;
 }
 
@@ -290,11 +302,14 @@ form {
   align-items: center;
   z-index: 1000;
 }
-.modal-body{
+
+.modal-body {
   margin-top: 12px;
   margin-bottom: 12px;
 }
+
 .modal-content {
+  text-align: center;
   max-width: 600px;
   min-width: 324px;
   background-color: #FFF;
@@ -354,15 +369,30 @@ form {
   font-weight: 300;
 }
 
-.leaflet-control, .leaflet-attribution-flag {
+.leaflet-control,
+.leaflet-attribution-flag {
   display: none !important;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 768px) {
   main {
-    height: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
   }
 
+  .addDesktop {
+    display: none;
+  }
+
+  .addMobile {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 430px) {
   footer {
     font-size: 10.5px;
   }

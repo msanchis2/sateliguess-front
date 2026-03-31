@@ -14,6 +14,7 @@ import { IAttempt, IDificultat, IMunicipio, TKeyPais, TModal } from "./types";
 import Map from "./components/Map";
 import Modal, { IModalProps } from "./components/Modal";
 import { dificultatInicial, opcionsPais } from "./config";
+import Ad from "./components/Ad";
 
 const App: React.FC = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/" //"http://localhost:3000/api/"; 
@@ -76,29 +77,19 @@ const App: React.FC = () => {
       }
       setDificultat(
         dificultatCache ? JSON.parse(dificultatCache) : dificultatInicial
-      );
-
-      setTimeout(async () => {
-        try {
-            const ua = navigator.userAgent;
-            const dispositiu =
-              /Mobi|Android/i.test(ua) || window.innerWidth < 768
-                ? "mòbil"
-                : "escriptori";
-            await axios.post(`${routeRef.current}visita`, { dispositiu });
-        } catch (err) {
-          console.error("Error registrant la visita:", err);
-        }
-      }, 3000);
-
-      console.log(`
-         \\    /\\
-          )  ( ')  Meow
-          (  /  )
-           \\(__)|
-
-    Cigró diu hola!
-    `);
+      )
+      // setTimeout(async () => {
+      //   try {
+      //       const ua = navigator.userAgent;
+      //       const dispositiu =
+      //         /Mobi|Android/i.test(ua) || window.innerWidth < 768
+      //           ? "mòbil"
+      //           : "escriptori";
+      //       await axios.post(`${routeRef.current}visita`, { dispositiu });
+      //   } catch (err) {
+      //     console.error("Error registrant la visita:", err);
+      //   }
+      // }, 3000);
     }
   }, []);
 
@@ -206,6 +197,24 @@ const App: React.FC = () => {
 
   // Centralitzem totes les configuracions relacionades amb el modal
   const modalConfig: Record<TModal, IModalProps> = {
+    ads: {
+      onClose: () => toggleModal("ads"),
+      title: "Per què veig publicitat?",
+      btnText: "Entesos",
+      children: (
+        <>
+          <p>
+            Sateliguess té un cost de manteniment (servidor, APIs, etc.). Per això es mostra una mica de publicitat per ajudar a cobrir aquestes despeses.
+          </p>
+          <p>
+            Si entre tots els usuaris s'aconsegueixen només <b>5€/mes</b> a <a href="https://www.ko-fi.com/martisanchis">Ko-fi</a>, es retirarà completament la publicitat.
+          </p>
+          <p>
+            Gràcies pel teu suport ❤️
+          </p>
+        </>
+      ),
+    },
     rendirse: {
       onClose: () => {
         toggleModal("rendirse");
@@ -334,120 +343,137 @@ const App: React.FC = () => {
 
   return (
     <main>
-      <header className="title">
-        <div className="ajuda">
-          <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
-          <div>_</div>
-        </div>
-        <h1>Sateliguess</h1>
-        <div className="regio">
-          <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
-          <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
-        </div>
-      </header>
-      <div id="mapa">
-        <Map
-          coordinates={coordinates}
-          key={`${coordinates?.join(",")}_${dificultat.zoom}`}
-          zoom={dificultat.zoom || 15}
-        />
-      </div>
-      <div className="attempts">
-        {attempts.length > 0 && (
-          <div className="attempts">
-            {attempts.map((attempt, index) => (
-              <div className="attempt" key={index}>
-                <span>❌ {attempt.nom}</span>
-                <div className="direccions">
-                  <span>{dificultat.distancia ? `${attempt.distancia} Km ` : " "}</span>
-                  <span className="fletxa">{dificultat.direccio ? attempt.direccio : ""}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      {win && (
-        <div className="win">
-          <span className="winMunicipi">✅ {municipioDiario?.municipio}</span>
-          <span>
-            {municipioDiario?.comarca} {municipioDiario?.provincia && `(${municipioDiario?.provincia})`}
-          </span>
-          <span>Intents emprats: {attempts.length + 1}</span>
+      {!isMobile && (
+        <div className="addDesktop">
+          <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
         </div>
       )}
-      <div className="container">
-        {!win && (
-          <form onSubmit={handleSubmit}>
-            <div className="searchInput">
-              <input
-                type="text"
-                value={input}
-                onChange={onInputChange}
-                placeholder={`Municipi ${
-                  getPais(pais, opcionsPais).placeholder
-                }...`}
-                onFocus={() => {
-                  if (isMobile)
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    });
-                }}
-              />
-              {suggestions.length > 0 && (
-                <div className="resultBox">
-                  {suggestions.map((m) => (
-                    <div key={m.id} onClick={() => handleSelectSuggestion(m)}>
-                      {m.municipio}
-                    </div>
-                  ))}
+      <div className="mainColumn">
+        <header className="title">
+          <div className="ajuda">
+            <div onClick={(e) => openModal(e, "ajuda")}>❓</div>
+            <div>_</div>
+          </div>
+          <h1>Sateliguess</h1>
+          <div className="regio">
+            <div onClick={(e) => openModal(e, "dificultat")}>⚙️</div>
+            <div onClick={(e) => openModal(e, "regio")}>🗺️</div>
+          </div>
+        </header>
+        <div id="mapa">
+          <Map
+            coordinates={coordinates}
+            key={`${coordinates?.join(",")}_${dificultat.zoom}`}
+            zoom={dificultat.zoom || 15}
+          />
+        </div>
+        <div className="attempts">
+          {attempts.length > 0 && (
+            <div className="attempts">
+              {attempts.map((attempt, index) => (
+                <div className="attempt" key={index}>
+                  <span>❌ {attempt.nom}</span>
+                  <div className="direccions">
+                    <span>{dificultat.distancia ? `${attempt.distancia} Km ` : " "}</span>
+                    <span className="fletxa">{dificultat.direccio ? attempt.direccio : ""}</span>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-            <button type="submit" className="boton">
-              🔎 ENDEVINA
-            </button>
-            <div className="botones">
-              {dificultat.pistes && (
-                <button
-                  onClick={(e) => pista(e)}
-                  className={
-                    attempts.length < 5 || pistaGastada
-                      ? "boton disabled"
-                      : "boton"
-                  }
-                  disabled={attempts.length < 5 || pistaGastada}
-                >
-                  Pista{" "}
-                  <span className="intents">
-                    {attempts.length < 5 && `Intents: ${attempts.length}/5`}
-                  </span>
-                </button>
-              )}
-              <button onClick={() => toggleModal("rendirse")} className="boton">
-                Em rendisc
-              </button>
-            </div>
-          </form>
-        )}
+          )}
+        </div>
         {win && (
-          <button onClick={() => cargarMunicipio()} className="boton">
-            Carrega'n un altre
-          </button>
+          <div className="win">
+            <span className="winMunicipi">✅ {municipioDiario?.municipio}</span>
+            <span>
+              {municipioDiario?.comarca} {municipioDiario?.provincia && `(${municipioDiario?.provincia})`}
+            </span>
+            <span>Intents emprats: {attempts.length + 1}</span>
+          </div>
+        )}
+        <div className="container">
+          {!win && (
+            <form onSubmit={handleSubmit}>
+              <div className="searchInput">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={onInputChange}
+                  placeholder={`Municipi ${
+                    getPais(pais, opcionsPais).placeholder
+                  }...`}
+                  onFocus={() => {
+                    if (isMobile)
+                      window.scrollTo({
+                        top: document.body.scrollHeight,
+                        behavior: "smooth",
+                      });
+                  }}
+                />
+                {suggestions.length > 0 && (
+                  <div className="resultBox">
+                    {suggestions.map((m) => (
+                      <div key={m.id} onClick={() => handleSelectSuggestion(m)}>
+                        {m.municipio}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button type="submit" className="boton">
+                🔎 ENDEVINA
+              </button>
+              <div className="botones">
+                {dificultat.pistes && (
+                  <button
+                    onClick={(e) => pista(e)}
+                    className={
+                      attempts.length < 5 || pistaGastada
+                        ? "boton disabled"
+                        : "boton"
+                    }
+                    disabled={attempts.length < 5 || pistaGastada}
+                  >
+                    Pista{" "}
+                    <span className="intents">
+                      {attempts.length < 5 && `Intents: ${attempts.length}/5`}
+                    </span>
+                  </button>
+                )}
+                <button onClick={() => toggleModal("rendirse")} className="boton">
+                  Em rendisc
+                </button>
+              </div>
+            </form>
+          )}
+          {win && (
+            <button onClick={() => cargarMunicipio()} className="boton">
+              Carrega'n un altre
+            </button>
+          )}
+        </div>
+        <footer>
+          <Footer />
+        </footer>
+        {!isNull(modal) && (
+          <Modal
+            onClose={modalConfig[modal].onClose}
+            title={modalConfig[modal].title}
+            btnText={modalConfig[modal].btnText}
+          >
+            {modalConfig[modal]?.children}
+          </Modal>
         )}
       </div>
-      <footer>
-        <Footer />
-      </footer>
-      {!isNull(modal) && (
-        <Modal
-          onClose={modalConfig[modal].onClose}
-          title={modalConfig[modal].title}
-          btnText={modalConfig[modal].btnText}
-        >
-          {modalConfig[modal]?.children}
-        </Modal>
+      {!isMobile && (
+        <div className="addDesktop">
+          <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
+        </div>
+      )}
+      {isMobile && (
+        <div className="addMobile">
+          <Ad type="mobile" onInfoClick={() => toggleModal("ads")} />
+        </div>
       )}
     </main>
   );
