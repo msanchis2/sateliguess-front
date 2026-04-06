@@ -195,7 +195,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Centralitzem totes les configuracions relacionades amb el modal
   const modalConfig: Record<TModal, IModalProps> = {
     ads: {
       onClose: () => toggleModal("ads"),
@@ -343,11 +342,11 @@ const App: React.FC = () => {
 
   return (
     <main>
-      {!isMobile && (
+      {/* {!isMobile && (
         <div className="addDesktop">
           <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
         </div>
-      )}
+      )} */}
       <div className="mainColumn">
         <header className="title">
           <div className="ajuda">
@@ -465,7 +464,7 @@ const App: React.FC = () => {
           </Modal>
         )}
       </div>
-      {!isMobile && (
+      {/* {!isMobile && (
         <div className="addDesktop">
           <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
         </div>
@@ -474,7 +473,7 @@ const App: React.FC = () => {
         <div className="addMobile">
           <Ad type="mobile" onInfoClick={() => toggleModal("ads")} />
         </div>
-      )}
+      )} */}
     </main>
   );
 };
