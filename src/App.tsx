@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios, { AxiosResponse } from "axios";
 import { debounce, isEmpty, isNull } from "lodash";
-import "./styles/App.css";
 import {
   distance,
   generarPistaLletres,
@@ -14,7 +13,8 @@ import { IAttempt, IDificultat, IMunicipio, TKeyPais, TModal } from "./types";
 import Map from "./components/Map";
 import Modal, { IModalProps } from "./components/Modal";
 import { dificultatInicial, opcionsPais } from "./config";
-import Ad from "./components/Ad";
+import "./styles/App.css"
+// import Ad from "./components/Ad";
 
 const App: React.FC = () => {
   const route = "https://sateliguess-back-production.up.railway.app/api/" //"http://localhost:3000/api/"; 
@@ -342,11 +342,11 @@ const App: React.FC = () => {
 
   return (
     <main>
-      {/* {!isMobile && (
+      {!isMobile && (
         <div className="addDesktop">
-          <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
+          {/* <Ad type="desktop" onInfoClick={() => toggleModal("ads")} /> */}
         </div>
-      )} */}
+      )}
       <div className="mainColumn">
         <header className="title">
           <div className="ajuda">
@@ -464,16 +464,16 @@ const App: React.FC = () => {
           </Modal>
         )}
       </div>
-      {/* {!isMobile && (
+      {!isMobile && (
         <div className="addDesktop">
-          <Ad type="desktop" onInfoClick={() => toggleModal("ads")} />
+          {/* <Ad type="desktop" onInfoClick={() => toggleModal("ads")} /> */}
         </div>
       )}
       {isMobile && (
         <div className="addMobile">
-          <Ad type="mobile" onInfoClick={() => toggleModal("ads")} />
+          {/* <Ad type="mobile" onInfoClick={() => toggleModal("ads")} /> */}
         </div>
-      )} */}
+      )}
     </main>
   );
 };
