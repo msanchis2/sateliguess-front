@@ -34,4 +34,4 @@ export interface IAttempt {
   direccio: string;
 }
 
-export type TModal = "rendirse" | "ajuda" | "dificultat" | "pista" | "regio" | "ads";
+export type TModal = "rendirse" | "ajuda" | "dificultat" | "pista" | "regio" | "ads" | "tancament";

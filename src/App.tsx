@@ -72,6 +72,7 @@ const App: React.FC = () => {
       firstLoad.current = false;
       const dificultatCache = localStorage.getItem("dificultat");
       const paisCache = localStorage.getItem("pais");
+      toggleModal("tancament");
       if (!paisCache) {
         toggleModal("regio");
       }
@@ -186,7 +187,7 @@ const App: React.FC = () => {
 
   const handleCloseModal = () => {
     setModal(null);
-    if(pistaIndex < 1 && pais === "ib") {
+    if (pistaIndex < 1 && pais === "ib") {
       setPistaIndex(pistaIndex + 1);
       return;
     }
@@ -338,6 +339,34 @@ const App: React.FC = () => {
         </div>
       ),
     },
+    tancament: {
+      onClose: () => {
+        toggleModal("tancament");
+        // Si no hi ha país guardat, mostrem el selector de regió després de tancar l'avís
+        if (!localStorage.getItem("pais")) {
+          toggleModal("regio");
+        }
+      },
+      title: "Sateliguess tancarà el proper 31 d'Agost",
+      btnText: "Entesos",
+      children: (
+        <>
+          <p>
+            Sateliguess és un joc sense cap tipus d'ingressos, no recollim les teves dades ni mostrem publicitat. El seu manteniment ha estat finançat per complet pel seu creador a fons perdut.
+          </p>
+          <p>
+            Donat el seu descens d'usuaris, s'ha optat per deixar de pagar el manteniment del servidor.
+          </p>
+          <p>
+            Si t'agrada Sateliguess i vols poder seguir jugant, considera fer un donatiu a{" "}
+            <a href="https://ko-fi.com/martisanchis" target="_blank" rel="noreferrer">
+              Ko-fi
+            </a>{" "}
+          </p>
+          <p>Si arribem a uns ingresos de 5€/mes, es mantindra actiu</p>
+        </>
+      ),
+    },
   };
 
   return (
@@ -398,9 +427,8 @@ const App: React.FC = () => {
                   type="text"
                   value={input}
                   onChange={onInputChange}
-                  placeholder={`Municipi ${
-                    getPais(pais, opcionsPais).placeholder
-                  }...`}
+                  placeholder={`Municipi ${getPais(pais, opcionsPais).placeholder
+                    }...`}
                   onFocus={() => {
                     if (isMobile)
                       window.scrollTo({
